@@ -35,7 +35,7 @@ os.chdir('/kaggle/working/backend'); sys.path.insert(0, '.'); os.makedirs('/kagg
 meta = glob.glob('/kaggle/input/**/candidates.json', recursive=True); assert meta; CAND = os.path.dirname(meta[0])
 real_dirs = [d for d in glob.glob('/kaggle/input/**/Celeb-real', recursive=True) if os.path.isdir(d)]; assert real_dirs; CDF_ROOT = os.path.dirname(real_dirs[0])
 ffhq = glob.glob('/kaggle/input/**/data_source/data_source/ffhq', recursive=True); assert ffhq, "Attach philosopher0808/real-vs-ai-generated-faces-dataset"
-PH = os.path.dirname(os.path.dirname(ffhq[0]))                                     # .../data_source/data_source/ffhq -> .../data_source/data_source
+PH = os.path.dirname(ffhq[0])                                                      # .../data_source/data_source/ffhq -> .../data_source/data_source (holds ffhq/ and fake/)
 SFHQ = sorted(glob.glob(os.path.join(PH, 'fake', 'sfhq', 'pt*')))
 dd_tr = glob.glob('/kaggle/input/**/ddata/train/fake', recursive=True); dd_te = glob.glob('/kaggle/input/**/ddata/test/fake', recursive=True)
 assert SFHQ and dd_tr and dd_te, (SFHQ, dd_tr, dd_te)

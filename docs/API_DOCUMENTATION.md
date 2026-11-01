@@ -11,7 +11,7 @@ All responses are JSON unless stated. Schemas are defined in `backend/verifai/sc
 | GET | `/api/model` | Model card, limits, explainability availability | 200 |
 | POST | `/api/analyze/image` | Analyse an image (synchronous) | 200 `AnalysisResult` |
 | POST | `/api/analyze/video` | Submit a video (background job) | 202 `JobState` |
-| GET | `/api/analyses?limit=50` | Recent analyses | 200 `[AnalysisSummary]` |
+| GET | `/api/analyses?limit=50` | Recent analyses (an empty list when `VERIFAI_PUBLIC_HISTORY=false`, which public deployments use; each browser then tracks its own analyses by id) | 200 `[AnalysisSummary]` |
 | GET | `/api/analyses/{id}/status` | Job status / progress | 200 `JobState` |
 | GET | `/api/analyses/{id}` | Full result | 200 `AnalysisResult` (409 if not finished/failed) |
 | GET | `/api/analyses/{id}/report.pdf` | Forensic report | 200 `application/pdf` |
@@ -94,3 +94,7 @@ bundle = load_model(s.model_path, s.device)
 res = analyze_image(Path("photo.jpg"), "photo.jpg", bundle, FaceDetector(bundle.device, s), Explainer(bundle), s, artifacts_dir=Path("out"))
 print(res.classification, res.fake_probability)
 ```
+
+
+## Cross-origin use (hosted deployments)
+The browser UI may be served from a different origin than the API (Vercel + Render). The API answers CORS only for the origins listed in `VERIFAI_CORS_ORIGINS` (comma separated, no trailing slash); other origins receive no `access-control-allow-origin` header. The frontend reads the API origin from `VITE_API_BASE_URL` at build time. Memory-related settings for small hosts: `VERIFAI_ENABLE_HEATMAPS`, `VERIFAI_INFER_BATCH_SIZE`, `VERIFAI_VIDEO_BATCH_SIZE` (see `docs/DEPLOYMENT.md`). `GET /api/model` reports `explainability.grad_cam_available`, so clients can tell when heat-maps are switched off.

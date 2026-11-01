@@ -90,3 +90,16 @@ FastAPI runs synchronous endpoints in a thread pool. `ModelBundle.lock` serialis
 ## 8. Security considerations implemented / not implemented
 Implemented: upload allow-list and size limits, random server-side file names, client file names never touch the file system, decompression-bomb pixel cap, artifact-name and ID whitelisting (no path traversal), `weights_only=True` checkpoint loading, security headers (`nosniff`, `no-store`), CORS allow-list, uploads removed after use, no secrets in code.
 Not implemented: authentication/authorisation, rate limiting, malware scanning, HTTPS termination (use a reverse proxy), multi-process job queue. Do not expose the service to untrusted networks without adding these.
+
+
+## 9. Deployment architecture and technology stack
+```
+Browser ──► Vercel: static React build (hash routes, SPA) ──HTTPS + CORS──► Render web service (Docker): FastAPI + PyTorch (CPU)
+                                                                           ├─ face detection (MTCNN), two-stream EfficientNet-B0 + SRM, Grad-CAM, PDF (ReportLab)
+                                                                           └─ results and evidence images on the instance disk (ephemeral on the free tier; a paid disk makes them durable)
+```
+* **Frontend:** React 18, TypeScript, Vite 5, Tailwind CSS 3; Vitest + Testing Library for unit tests and Playwright (system Chrome) for end-to-end tests. Hash routing means a refresh on any page loads `index.html`; `frontend/vercel.json` pins the build and adds security headers. The API origin is the public build-time variable `VITE_API_BASE_URL`.
+* **Backend:** Python, FastAPI + Uvicorn, PyTorch (CPU build in Docker), `efficientnet-pytorch`, `facenet-pytorch` (MTCNN), `grad-cam`, OpenCV (headless), Pillow, ReportLab. Configuration is by environment variables (`backend/.env.example`).
+* **Training and evaluation:** PyTorch on a Kaggle Tesla T4 (notebooks built by `kaggle/build_*_bundle.py`; only checkpoints and metrics leave the notebook), scikit-learn-style metrics with Wilson/bootstrap intervals.
+* **Hosting:** Vercel (frontend) and Render (backend, Docker). A 512 MB free Render instance cannot run Grad-CAM or longer videos; see `docs/DEPLOYMENT.md` for the measured memory needs and the "lite mode" used on the free tier.
+* **Privacy design:** uploads are deleted right after analysis; derived evidence is deleted after a TTL; results are reachable only by an unguessable id; the global history list can be disabled; no third-party AI service is called.
