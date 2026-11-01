@@ -5,6 +5,11 @@ import path from "node:path";
 const PUBLIC_IMAGE = process.env.VERIFAI_E2E_IMAGE ?? "";
 // Cross-origin deployments (Vercel UI + hosted API): set VERIFAI_E2E_API to the backend origin. Empty = same origin.
 const API = (process.env.VERIFAI_E2E_API ?? "").replace(/\/+$/, "");
+// Grad-CAM can be switched off on small hosts (VERIFAI_ENABLE_HEATMAPS=false, e.g. a 512 MB free instance). The UI must then say so honestly.
+async function gradCamOn(request: import("@playwright/test").APIRequestContext): Promise<boolean> {
+  const m = await (await request.get(`${API}/api/model`)).json();
+  return !!m.explainability?.grad_cam_available;
+}
 const PUBLIC_VIDEO = process.env.VERIFAI_E2E_PUBLIC_VIDEO ?? "";   // synthetic clip made from the public test image
 const PRIVATE_IMAGE = process.env.VERIFAI_E2E_PRIVATE_IMAGE ?? "";
 const PRIVATE_VIDEO = process.env.VERIFAI_E2E_PRIVATE_VIDEO ?? "";
@@ -131,6 +136,13 @@ test("public image: upload, progress, results, Grad-CAM, PDF, deletion", async (
   // heat-map viewer on the Overview: original crop + Grad-CAM side by side, both really decoded
   const viewer = page.getByTestId("face-heatmap-viewer");
   await expect(viewer).toBeVisible();
+  if (!(await gradCamOn(request))) {
+    // Grad-CAM is off on this server: the viewer must say so, show only the real face crop and invent nothing
+    await expect(viewer.getByTestId("heatmap-unavailable")).toBeVisible();
+    await expect(viewer.getByAltText(/Grad-CAM heat-map/)).toHaveCount(0);
+    await expect(viewer.getByAltText(/original face crop/)).toBeVisible();
+    await shot(page, "03b_heatmap_unavailable_honest");
+  } else {
   const decoded = (alt: RegExp) => viewer.getByAltText(alt).evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0);
   await expect(viewer.getByAltText(/Face #1 original face crop/)).toBeVisible();
   await expect(viewer.getByAltText(/Face #1 Grad-CAM heat-map/)).toBeVisible();
@@ -148,6 +160,7 @@ test("public image: upload, progress, results, Grad-CAM, PDF, deletion", async (
   expect(await viewer.getByTestId("overlay-top").evaluate((e) => getComputedStyle(e).opacity)).toBe("0.25");
   await shot(page, "03c_heatmap_overlay");
   await expect(viewer.getByText(/does not independently establish that anything was manipulated/)).toBeVisible();
+  }
 
   await page.getByRole("tab", { name: /forensic evidence/i }).click();
   await expect(page.getByAltText(/image with face bounding boxes/i)).toBeVisible();
@@ -185,8 +198,10 @@ test("public video: unified upload, timeline, frame selection and synchronised h
   // Overview already shows the stored frame next to its own Grad-CAM
   const viewer = page.getByTestId("frame-evidence-viewer");
   await expect(viewer).toBeVisible();
+  const camOn = await gradCamOn(request);
   await expect(viewer.getByAltText(/Evidence frame at/)).toBeVisible();
-  await expect(viewer.getByAltText(/Grad-CAM heat-map at/)).toBeVisible();
+  if (camOn) await expect(viewer.getByAltText(/Grad-CAM heat-map at/)).toBeVisible();
+  else await expect(viewer.getByTestId("heatmap-unavailable")).toBeVisible();   // honest: frame stored, heat-map not generated on this server
   await shot(page, "08_video_overview_heatmap");
 
   await page.getByRole("tab", { name: /frame analysis/i }).click();
@@ -205,14 +220,14 @@ test("public video: unified upload, timeline, frame selection and synchronised h
     expect(await dots.nth(i).getAttribute("data-testid")).toBe(`tl-dot-${frameNo}`);       // the selected dot and the viewer agree
     const stored = await v2.getByAltText(/Evidence frame at/).count();
     const cam = await v2.getByAltText(/Grad-CAM heat-map at/).count();
-    if (stored) { sawStored++; expect(cam, "stored frame shows its heat-map").toBe(1); }
+    if (stored) { sawStored++; expect(cam, camOn ? "stored frame shows its heat-map" : "no heat-map when Grad-CAM is off").toBe(camOn ? 1 : 0); }
     else { sawMissing++; expect(cam, "no heat-map without stored evidence").toBe(0); await expect(v2.getByTestId("heatmap-unavailable")).toBeVisible(); }
   }
   expect(sawStored).toBeGreaterThan(0);
   expect(first).toMatch(/Frame \d+/);
   await v2.getByRole("button", { name: /next analysed frame/i }).isEnabled();
   await shot(page, "09_video_frame_analysis");
-  await expect(v2.getByRole("button", { name: "Overlay" })).toBeDisabled();
+  if (camOn) await expect(v2.getByRole("button", { name: "Overlay" })).toBeDisabled();
   console.log(`video frames: ${n} analysed, ${sawStored} with stored heat-map, ${sawMissing} without`);
 
   // the viewer must stay usable on phones: no horizontal scroll at 390 px and at 320 px, controls still reachable
