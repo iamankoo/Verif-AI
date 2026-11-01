@@ -1,12 +1,10 @@
 import { useRef, useState } from "react";
 import type { Limits } from "../types";
 import { DEFAULT_LIMITS, validateFile, type Kind } from "../lib/format";
-import { IconFolder, IconUpload } from "./Icons";
+import { IconDatabase, IconImage, IconUpload, IconVideo } from "./Icons";
 
 interface Props {
   limits?: Pick<Limits, "max_image_mb" | "max_video_mb" | "image_formats" | "video_formats">;
-  /** Which kind the visible tab is about; the zone still accepts both (a file of the other kind switches the tab in the parent). */
-  mode?: Kind | "any";
   disabled?: boolean;
   onSelect: (file: File, kind: Kind) => void;
   onError: (message: string) => void;
@@ -14,7 +12,8 @@ interface Props {
 
 const names = (exts: string[]) => exts.map((e) => e.replace(".", "").toUpperCase()).join(", ");
 
-export function UploadZone({ limits = DEFAULT_LIMITS, mode = "any", disabled, onSelect, onError }: Props) {
+/** One drop zone for images and videos. The kind is decided from the file extension (the server re-validates the content). */
+export function UploadZone({ limits = DEFAULT_LIMITS, disabled, onSelect, onError }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
 
@@ -25,10 +24,6 @@ export function UploadZone({ limits = DEFAULT_LIMITS, mode = "any", disabled, on
     if (v.error || !v.kind) onError(v.error ?? "Unsupported file.");
     else onSelect(f, v.kind);
   };
-
-  const accept = mode === "image" ? limits.image_formats : mode === "video" ? limits.video_formats : [...limits.image_formats, ...limits.video_formats];
-  const headline = mode === "image" ? "Drag and drop an image here" : mode === "video" ? "Drag and drop a video here" : "Drag and drop an image or video here";
-  const maxMb = mode === "video" ? limits.max_video_mb : limits.max_image_mb;
 
   return (
     <div
@@ -42,7 +37,7 @@ export function UploadZone({ limits = DEFAULT_LIMITS, mode = "any", disabled, on
         setOver(false);
         if (!disabled) handle(e.dataTransfer.files);
       }}
-      className={`rounded-2xl border-2 border-dashed p-6 text-center transition sm:p-8 ${over ? "border-accent bg-accent-soft" : "border-paper-line/90 bg-paper/40"} ${disabled ? "opacity-60" : ""}`}
+      className={`rounded-2xl border-2 border-dashed px-4 py-8 text-center transition sm:px-8 ${over ? "border-accent bg-accent-soft" : "border-accent/50 bg-paper/40"} ${disabled ? "opacity-60" : ""}`}
       data-testid="dropzone"
     >
       <input
@@ -50,26 +45,24 @@ export function UploadZone({ limits = DEFAULT_LIMITS, mode = "any", disabled, on
         type="file"
         className="sr-only"
         aria-label="Choose an image or video file"
-        accept={accept.join(",")}
+        accept={[...limits.image_formats, ...limits.video_formats].join(",")}
         disabled={disabled}
         onChange={(e) => {
           handle(e.target.files);
           e.target.value = "";
         }}
       />
-      <IconUpload className="mx-auto mb-3 h-11 w-11 text-ink" />
-      <p className="text-lg font-semibold">{headline}</p>
-      <p className="mt-1 text-sm text-ink-soft">or click to browse from your device</p>
-      <button type="button" className="btn-primary mt-4" disabled={disabled} onClick={() => input.current?.click()}>
-        <IconFolder className="h-4 w-4" /> Browse files
+      <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-accent/40 bg-accent-soft text-accent"><IconUpload className="h-8 w-8" /></span>
+      <h2 className="mt-3 text-2xl font-bold">Upload Media</h2>
+      <p className="mt-1 text-ink-soft">Drag and drop an image or video, or browse your device.</p>
+      <button type="button" className="btn-primary mt-5 px-8 py-3 text-base" disabled={disabled} onClick={() => input.current?.click()}>
+        <IconUpload className="h-5 w-5" /> Choose File
       </button>
-      <p className="mt-4 text-xs text-ink-mute">
-        {mode === "any" ? (
-          <>Images up to {limits.max_image_mb} MB, videos up to {limits.max_video_mb} MB &middot; {accept.join(" ")}</>
-        ) : (
-          <>Supported: {names(accept)} &nbsp;|&nbsp; Max size: {maxMb} MB</>
-        )}
-      </p>
+      <ul className="mx-auto mt-6 flex max-w-4xl flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-xl border border-paper-line bg-paper-raised/60 px-4 py-2.5 text-xs text-ink-soft sm:text-sm">
+        <li className="flex items-center gap-2"><IconImage className="h-4 w-4 text-accent" /> Images: {names(limits.image_formats)}</li>
+        <li className="flex items-center gap-2"><IconVideo className="h-4 w-4 text-accent" /> Videos: {names(limits.video_formats)}</li>
+        <li className="flex items-center gap-2"><IconDatabase className="h-4 w-4 text-accent" /> Max size: {limits.max_image_mb} MB (images), {limits.max_video_mb} MB (videos)</li>
+      </ul>
     </div>
   );
 }

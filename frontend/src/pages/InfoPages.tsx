@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { loadRecent } from "../lib/history";
 import { IconCheckCircle, IconChip, IconFile, IconLayers, IconScan, IconShield, IconUpload } from "../components/Icons";
 import { ErrorBanner, HistoryList, ModelCard } from "../components/Panels";
 import type { AnalysisSummary, Health, ModelResponse } from "../types";
@@ -93,7 +94,7 @@ export function ReportsPage({ onOpen }: { onOpen: (id: string) => void }) {
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
-    api.list().then((l) => alive && setItems(l)).catch(() => alive && setError("Cannot reach the Verif-AI server. Is the backend running?"));
+    loadRecent().then((l) => alive && setItems(l)).catch(() => alive && setError("Cannot reach the Verif-AI server. Is the backend running?"));
     return () => {
       alive = false;
     };

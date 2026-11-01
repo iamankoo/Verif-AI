@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import type { AnalysisResult, Classification } from "../types";
 import { fmt3, fmtBytes, fmtTime } from "../lib/format";
+import { FaceHeatmapViewer, FrameEvidenceViewer, pickFrameForRange } from "./HeatmapViewer";
 import { IconArrowLeft, IconCalendar, IconChart, IconClock, IconDownload, IconFile, IconGauge, IconImage, IconLayers, IconScan, IconStack, IconTrash, IconUser, IconVideo } from "./Icons";
 import { ScoreBars, VerdictBadge, VerdictBlurb } from "./Verdict";
 import { VideoTimeline } from "./VideoTimeline";
@@ -58,6 +59,17 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
     { id: "report", label: "Report", Icon: IconFile },
   ];
   const [tab, setTab] = useState<TabId>("overview");
+  const [face, setFace] = useState(0);
+  // Video: the selected analysed frame (default: the highest-scoring stored evidence frame, else the highest-scoring frame).
+  const defaultFrame = useMemo(() => {
+    if (!v) return null;
+    const ev = [...v.evidence_frames].sort((a, b) => b.fake_probability - a.fake_probability)[0];
+    if (ev) return ev.frame_index;
+    const fr = [...v.frames].sort((a, b) => (b.frame_fake_probability ?? 0) - (a.frame_fake_probability ?? 0))[0];
+    return fr ? fr.frame_index : null;
+  }, [v]);
+  const [frameSel, setFrameSel] = useState<number | null>(defaultFrame);
+  const evidenceSet = useMemo(() => new Set((v?.evidence_frames ?? []).map((e) => e.frame_index)), [v]);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const onKey = (e: React.KeyboardEvent, i: number) => {
     const next = e.key === "ArrowRight" ? (i + 1) % tabs.length : e.key === "ArrowLeft" ? (i - 1 + tabs.length) % tabs.length : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : -1;
@@ -72,22 +84,14 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
   const created = new Date(result.created_at);
 
   const detectedFaces = result.media_type === "image" && result.annotated_artifact && (
-    <img src={art(result.annotated_artifact)} alt="Analysed image with face bounding boxes" className="max-h-[28rem] w-full rounded-xl bg-paper object-contain" />
+    <>
+      <img src={art(result.annotated_artifact)} alt="Analysed image with face bounding boxes" className="max-h-[28rem] w-full rounded-xl bg-paper object-contain" />
+      <p className="mt-2 text-xs text-ink-mute">Boxes and numbers (#1, #2, ...) match the face numbers used in the heat-map viewer. The original upload is deleted after analysis, so this annotated copy and the face crops are what the server keeps.</p>
+    </>
   );
 
-  const evidenceFrames = v && v.evidence_frames.length > 0 && (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {v.evidence_frames.map((e, i) => (
-        <figure key={i} className="rounded-xl border border-paper-line bg-paper/50 p-2">
-          <img src={art(e.frame_artifact)} alt={`Evidence frame at ${e.timestamp_s.toFixed(1)} seconds`} className="w-full rounded-lg" />
-          <div className="mt-2 flex items-center gap-3">
-            {e.heatmap_artifact && <img src={art(e.heatmap_artifact)} alt={`Grad-CAM heat-map at ${e.timestamp_s.toFixed(1)} seconds`} className="h-16 w-16 rounded-lg object-cover" />}
-            <figcaption className="text-xs text-ink-soft">t = {fmtTime(e.timestamp_s)} (frame {e.frame_index})<br />fake-score {e.fake_probability.toFixed(3)}</figcaption>
-          </div>
-        </figure>
-      ))}
-    </div>
-  );
+  const frameViewer = v && <FrameEvidenceViewer video={v} art={art} selected={frameSel} onSelect={setFrameSel} />;
+  const faceViewer = <FaceHeatmapViewer result={result} art={art} faceIndex={face} onFace={setFace} />;
 
   return (
     <div className="space-y-5" data-testid="result-view">
@@ -179,9 +183,12 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
             </div>
             <div className="space-y-5">
               {result.media_type === "image" ? (
-                detectedFaces && <Section title="Detected faces" icon={<IconScan className="h-5 w-5" />}>{detectedFaces}</Section>
+                <>
+                  {result.faces.length > 0 && <Section title="Heatmap Viewer" icon={<IconScan className="h-5 w-5" />}>{faceViewer}</Section>}
+                  {detectedFaces && <Section title="Detected faces" icon={<IconUser className="h-5 w-5" />}>{detectedFaces}</Section>}
+                </>
               ) : (
-                evidenceFrames && <Section title="Highest-Scoring Frames" icon={<IconImage className="h-5 w-5" />}>{evidenceFrames}</Section>
+                v && <Section title="Frame Evidence" icon={<IconImage className="h-5 w-5" />}>{frameViewer}</Section>
               )}
               {result.model && (
                 <Section title="Model Information" icon={<IconStack className="h-5 w-5" />}>
@@ -196,7 +203,6 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
                       <div key={k} className="flex justify-between gap-4"><dt className="text-ink-mute">{k}</dt><dd className="text-right font-medium">{val}</dd></div>
                     ))}
                   </dl>
-                  <p className="mt-3 text-xs text-ink-mute">Grad-CAM highlights the image regions that most influenced the RGB stream&apos;s score.</p>
                 </Section>
               )}
             </div>
@@ -205,6 +211,37 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
 
         {tab === "frames" && v && (
           <>
+            <Section title="Frame timeline" icon={<IconChart className="h-5 w-5" />}>
+              <VideoTimeline frames={v.frames} duration={v.duration_s} selected={frameSel} onSelect={setFrameSel} evidence={evidenceSet} />
+              {v.temporal && (
+                <p className="mt-2 text-xs text-ink-soft">
+                  {Math.round(v.temporal.suspicious_fraction * 100)}% of frames above 0.5 &middot; longest consecutive run {v.temporal.longest_suspicious_run} &middot; score std {v.temporal.score_std.toFixed(3)} &middot; {v.temporal.sign_flips} boundary crossings
+                </p>
+              )}
+            </Section>
+            <Section title="Selected frame and heatmap" icon={<IconImage className="h-5 w-5" />}>{frameViewer}</Section>
+            <Section title="Suspicious timestamps" icon={<IconClock className="h-5 w-5" />}>
+              {v.suspicious_segments.length ? (
+                <ul className="space-y-1.5 text-sm" data-testid="segments">
+                  {v.suspicious_segments.map((s, i) => (
+                    <li key={i}>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-3 rounded-xl bg-fake-soft px-3 py-2 text-left hover:ring-1 hover:ring-fake/60"
+                        title="Show the highest-scoring frame in this range"
+                        onClick={() => { const f = pickFrameForRange(v, s); if (f != null) setFrameSel(f); }}
+                      >
+                        <span>{fmtTime(s.start_s)} - {fmtTime(s.end_s)} <span className="text-ink-mute">({s.frames} frame{s.frames > 1 ? "s" : ""})</span></span>
+                        <span className="tabular-nums">max {s.max_fake_probability.toFixed(3)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-ink-soft">No analysed frame scored above the 0.5 decision boundary.</p>
+              )}
+              <p className="mt-2 text-xs text-ink-mute">Model-flagged time ranges are leads for review, not proof. Select one to inspect its highest-scoring frame above.</p>
+            </Section>
             <Section title="Video summary" icon={<IconVideo className="h-5 w-5" />}>
               <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <Stat k="Duration" v={fmtTime(v.duration_s)} />
@@ -217,29 +254,6 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
                 <Stat k="FPS" v={v.fps.toFixed(2)} />
               </dl>
               {!v.aggregation_validated && <p className="mt-3 text-xs text-ink-mute">The aggregation method was chosen a priori and has not been validated on labelled videos.</p>}
-            </Section>
-            <Section title="Frame timeline" icon={<IconChart className="h-5 w-5" />}>
-              <VideoTimeline frames={v.frames} duration={v.duration_s} />
-              {v.temporal && (
-                <p className="mt-2 text-xs text-ink-soft">
-                  {Math.round(v.temporal.suspicious_fraction * 100)}% of frames above 0.5 &middot; longest consecutive run {v.temporal.longest_suspicious_run} &middot; score std {v.temporal.score_std.toFixed(3)} &middot; {v.temporal.sign_flips} boundary crossings
-                </p>
-              )}
-            </Section>
-            <Section title="Suspicious timestamps" icon={<IconClock className="h-5 w-5" />}>
-              {v.suspicious_segments.length ? (
-                <ul className="space-y-1.5 text-sm" data-testid="segments">
-                  {v.suspicious_segments.map((s, i) => (
-                    <li key={i} className="flex justify-between rounded-xl bg-fake-soft px-3 py-2">
-                      <span>{fmtTime(s.start_s)} - {fmtTime(s.end_s)} <span className="text-ink-mute">({s.frames} frame{s.frames > 1 ? "s" : ""})</span></span>
-                      <span className="tabular-nums">max {s.max_fake_probability.toFixed(3)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-ink-soft">No analysed frame scored above the 0.5 decision boundary.</p>
-              )}
-              <p className="mt-2 text-xs text-ink-mute">Model-flagged time ranges are leads for review, not proof.</p>
             </Section>
           </>
         )}
@@ -277,42 +291,45 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
                   <Section title={`Per-face results (${result.faces.length})`} icon={<IconUser className="h-5 w-5" />}>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-sm">
-                        <thead className="text-xs uppercase text-ink-mute"><tr><th className="py-1 pr-3">Face</th><th className="pr-3">Verdict</th><th className="pr-3">Fake</th><th className="pr-3">Real</th><th>Detector</th></tr></thead>
+                        <thead className="text-xs uppercase text-ink-mute"><tr><th className="py-1 pr-3">Face</th><th className="pr-3">Verdict</th><th className="pr-3">Fake</th><th className="pr-3">Real</th><th className="pr-3">Detector</th><th>Heat-map</th></tr></thead>
                         <tbody>
                           {result.faces.map((f) => (
-                            <tr key={f.index} className="border-t border-paper-line">
+                            <tr key={f.index} className={`border-t border-paper-line ${f.index === face ? "bg-accent-soft/40" : ""}`}>
                               <td className="py-2 pr-3">#{f.index + 1}</td>
                               <td className="pr-3"><VerdictBadge value={f.label} size="sm" /></td>
                               <td className="pr-3 tabular-nums">{fmt3(f.fake_probability)}</td>
                               <td className="pr-3 tabular-nums">{fmt3(f.real_probability)}</td>
-                              <td className="tabular-nums">{fmt3(f.detection_confidence)}</td>
+                              <td className="pr-3 tabular-nums">{fmt3(f.detection_confidence)}</td>
+                              <td>{f.crop_artifact ? <button type="button" className="font-semibold text-accent hover:underline" onClick={() => setFace(f.index)} aria-label={`Show face ${f.index + 1} in the viewer`}>View</button> : <span className="text-ink-mute">n/a</span>}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
-                    {result.faces.some((f) => f.heatmap_artifact) && (
-                      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                        {result.faces.filter((f) => f.crop_artifact).slice(0, 6).map((f) => (
-                          <figure key={f.index} className="rounded-xl border border-paper-line bg-paper/50 p-2">
-                            <div className="grid grid-cols-2 gap-2">
-                              <img src={art(f.crop_artifact)} alt={`Face ${f.index + 1} model input`} className="rounded-lg" />
-                              {f.heatmap_artifact && <img src={art(f.heatmap_artifact)} alt={`Face ${f.index + 1} Grad-CAM heat-map`} className="rounded-lg" />}
-                            </div>
-                            <figcaption className="mt-1 text-xs text-ink-mute">Face #{f.index + 1}: model input (left) and Grad-CAM (right)</figcaption>
-                          </figure>
-                        ))}
-                      </div>
-                    )}
+                    <div className="mt-5">{faceViewer}</div>
                   </Section>
                 ) : (
                   <Section title="Per-face results"><p className="text-sm text-ink-soft">No usable face was found, so there is no per-face evidence.</p></Section>
                 )}
               </>
             ) : (
-              <Section title="Highest-scoring frames" icon={<IconImage className="h-5 w-5" />}>
-                {evidenceFrames || <p className="text-sm text-ink-soft">No evidence frames were produced for this video.</p>}
-                <p className="mt-3 text-xs text-ink-mute">Grad-CAM thumbnails show regions that influenced the RGB stream&apos;s score; they are not proof that pixels were altered.</p>
+              <Section title="Stored evidence frames" icon={<IconImage className="h-5 w-5" />}>
+                {v && v.evidence_frames.length > 0 ? (
+                  <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {v.evidence_frames.map((e) => (
+                      <li key={e.frame_index} className="rounded-xl border border-paper-line bg-paper/50 p-2">
+                        <img src={art(e.frame_artifact)} alt={`Stored frame at ${e.timestamp_s.toFixed(1)} seconds`} className="w-full rounded-lg" />
+                        <div className="mt-2 flex items-center justify-between gap-3 text-xs text-ink-soft">
+                          <span>t = {fmtTime(e.timestamp_s)} (frame {e.frame_index}) &middot; fake-score {e.fake_probability.toFixed(3)} &middot; {e.heatmap_artifact ? "heat-map stored" : "no heat-map"}</span>
+                          <button type="button" className="shrink-0 font-semibold text-accent hover:underline" onClick={() => { setFrameSel(e.frame_index); setTab("frames"); }}>Open</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-ink-soft">No evidence frames were produced for this video.</p>
+                )}
+                <p className="mt-3 text-xs text-ink-mute">Grad-CAM marks regions that influenced the RGB stream&apos;s score; it is not proof that pixels were altered. Open a frame to see its heat-map next to the original.</p>
               </Section>
             )}
           </>

@@ -45,6 +45,6 @@ describe("UploadZone", () => {
     const { onSelect } = setup(true);
     fireEvent.drop(screen.getByTestId("dropzone"), { dataTransfer: { files: [new File(["x"], "a.png")] } });
     expect(onSelect).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: /browse files/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /choose file/i })).toBeDisabled();
   });
 });

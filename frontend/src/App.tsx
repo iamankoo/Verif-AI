@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IconChip, IconClose, IconFile, IconGithub, IconHome, IconInfo, IconLayers, IconMenu } from "./components/Icons";
+import { IconChip, IconClose, IconFile, IconGithub, IconHome, IconInfo, IconLayers, IconMenu, IconShield } from "./components/Icons";
 import { AboutPage, HowItWorksPage, ModelPage, ReportsPage } from "./pages/InfoPages";
 import { AnalysisPage } from "./pages/AnalysisPage";
 import { Home } from "./pages/Home";
@@ -29,11 +29,14 @@ function Header({ route }: { route: Route }) {
   useEffect(() => setOpen(false), [route]);
   const current = route.page === "analysis" ? "home" : route.page;
   return (
-    <header className="sticky top-0 z-30 border-b border-paper-line bg-white">
+    <header className="sticky top-0 z-30 border-b border-paper-line bg-paper/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <a href="#/" className="flex items-center gap-2.5" aria-label="Verif-AI home">
-          <img src="/favicon.svg" alt="" className="h-9 w-9" />
-          <span className="text-xl font-bold tracking-tight">Verif-AI</span>
+        <a href="#/" className="flex items-center gap-3" aria-label="Verif-AI home">
+          <IconShield className="h-10 w-10 text-accent" />
+          <span>
+            <span className="block text-xl font-bold leading-tight tracking-tight">Verif-AI</span>
+            <span className="block text-xs text-ink-soft">AI Media Forensics</span>
+          </span>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV.map(({ href, label, page, Icon }) => (
@@ -75,6 +78,21 @@ function Header({ route }: { route: Route }) {
   );
 }
 
+/** Purely decorative abstract wave lines (original artwork, no content). */
+function Waves() {
+  return (
+    <svg aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 -z-0 h-[34rem] w-full opacity-60" viewBox="0 0 1440 540" preserveAspectRatio="xMidYMin slice" fill="none">
+      <defs>
+        <linearGradient id="wv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#1fe3c4" stopOpacity=".55" /><stop offset=".5" stopColor="#1fe3c4" stopOpacity="0" /><stop offset="1" stopColor="#1fe3c4" stopOpacity=".55" /></linearGradient>
+      </defs>
+      <g stroke="url(#wv)" strokeWidth="1.2">
+        {[0, 1, 2, 3, 4, 5].map((i) => <path key={`l${i}`} d={`M-20 ${170 + i * 14} C 160 ${60 + i * 12}, 260 ${200 + i * 10}, 420 ${120 + i * 16}`} opacity={0.55 - i * 0.07} />)}
+        {[0, 1, 2, 3, 4, 5].map((i) => <path key={`r${i}`} d={`M1460 ${230 + i * 14} C 1280 ${120 + i * 12}, 1180 ${260 + i * 10}, 1020 ${170 + i * 16}`} opacity={0.55 - i * 0.07} />)}
+      </g>
+    </svg>
+  );
+}
+
 export default function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
   useEffect(() => {
@@ -93,8 +111,9 @@ export default function App() {
   };
   return (
     <>
+      <Waves />
       <Header route={route} />
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <main className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6">
         {route.page === "analysis" ? <AnalysisPage id={route.id} onHome={home} /> : null}
         {route.page === "home" ? <Home onOpen={open} /> : null}
         {route.page === "how" ? <HowItWorksPage /> : null}

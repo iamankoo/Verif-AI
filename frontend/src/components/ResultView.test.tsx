@@ -24,7 +24,7 @@ describe("ResultView - image", () => {
     expect(rows).toHaveLength(3);                                  // header + 2 faces
     expect(within(rows[1]).getByText("FAKE")).toBeInTheDocument();
     expect(within(rows[2]).getByText("REAL")).toBeInTheDocument();
-    expect(screen.getByAltText("Face 1 Grad-CAM heat-map")).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/face_0_heatmap.jpg`);
+    expect(screen.getAllByAltText("Face #1 Grad-CAM heat-map")[0]).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/face_0_heatmap.jpg`);
     expect(screen.getByAltText(/image with face bounding boxes/i)).toBeInTheDocument();
   });
 
@@ -83,6 +83,8 @@ describe("ResultView - video", () => {
     expect(screen.getByTestId("verdict")).toHaveTextContent("FAKE");
     await tab(/frame analysis/i);
     expect(screen.getByRole("img", { name: /timeline over 6.0 seconds/i })).toBeInTheDocument();
+    expect(screen.getByAltText(/Evidence frame at 4.0 seconds/)).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/evidence_0.jpg`);
+    expect(screen.getByAltText(/Grad-CAM heat-map at 4.0 seconds/)).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/evidence_0_heatmap.jpg`);
     const seg = within(screen.getByTestId("segments")).getAllByRole("listitem");
     expect(seg).toHaveLength(1);
     expect(seg[0]).toHaveTextContent("2.0s - 6.0s");
@@ -92,7 +94,7 @@ describe("ResultView - video", () => {
     await tab(/face tracks/i);
     expect(within(screen.getByRole("table")).getAllByRole("row").length).toBeGreaterThan(1);
     await tab(/forensic evidence/i);
-    expect(screen.getByAltText(/Evidence frame at 4.0 seconds/)).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/evidence_0.jpg`);
+    expect(screen.getByAltText(/Stored frame at 4.0 seconds/)).toHaveAttribute("src", `/api/analyses/${ID}/artifacts/evidence_0.jpg`);
   });
 
   it("says so when no frame is suspicious", async () => {

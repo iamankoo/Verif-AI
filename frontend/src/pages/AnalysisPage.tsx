@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "../api";
 import { ErrorBanner, ProgressPanel } from "../components/Panels";
 import { ResultView } from "../components/ResultView";
+import { forget } from "../lib/history";
 import type { AnalysisResult, JobState } from "../types";
 
 export function AnalysisPage({ id, onHome, pollMs = 1000 }: { id: string; onHome: () => void; pollMs?: number }) {
@@ -41,6 +42,7 @@ export function AnalysisPage({ id, onHome, pollMs = 1000 }: { id: string; onHome
   const remove = async () => {
     try {
       await api.remove(id);
+      forget(id);
       onHome();
     } catch {
       setError("Could not delete this analysis.");

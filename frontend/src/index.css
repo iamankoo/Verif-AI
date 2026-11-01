@@ -4,19 +4,30 @@
 @tailwind utilities;
 
 @layer base {
-  html { @apply bg-paper text-ink antialiased; }
-  body { @apply font-sans min-h-screen; }
+  html { @apply bg-paper text-ink antialiased; color-scheme: dark; }
+  body {
+    @apply font-sans min-h-screen;
+    background-image:
+      radial-gradient(70rem 30rem at 90% -8%, rgba(31, 227, 196, 0.13), transparent 62%),
+      radial-gradient(55rem 32rem at -10% 35%, rgba(31, 227, 196, 0.09), transparent 62%);
+    background-attachment: fixed;
+  }
   h1, h2, h3 { @apply font-sans font-semibold tracking-tight; }
   :focus-visible { @apply outline outline-2 outline-offset-2 outline-accent; }
+  ::selection { background: rgba(31, 227, 196, 0.35); }
 }
 
 @layer components {
-  .card { @apply rounded-xl border border-paper-line bg-paper-card shadow-sm; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn bg-accent text-white hover:bg-accent-dark; }
-  .btn-secondary { @apply btn border border-paper-line bg-white text-ink hover:bg-paper-raised; }
-  .btn-danger { @apply btn border border-fake/30 bg-white text-fake hover:bg-fake-soft; }
-  .chip { @apply inline-flex items-center gap-1.5 rounded-md border border-paper-line bg-paper-raised px-2.5 py-1 text-xs text-ink-soft; }
-  .nav-link { @apply inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-paper-raised hover:text-ink; }
-  .nav-link[aria-current="page"] { @apply bg-accent-soft text-accent; }
+  .card { @apply rounded-2xl border border-paper-line bg-paper-card/90 shadow-card; }
+  .card-glow { @apply rounded-2xl border border-accent/40 bg-paper-card/90 shadow-glow; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-accent text-paper hover:bg-accent-dark; }
+  .btn-secondary { @apply btn border border-paper-line bg-paper-raised text-ink hover:border-accent/60; }
+  .btn-danger { @apply btn border border-fake/50 bg-fake-soft text-fake hover:bg-fake/20; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-lg border border-paper-line bg-paper-raised px-2.5 py-1 text-xs text-ink-soft; }
+  .nav-link { @apply inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-paper-raised hover:text-ink; }
+  .nav-link[aria-current="page"] { @apply bg-accent-dark text-paper; }
+  .seg { @apply inline-flex rounded-xl border border-paper-line bg-paper/70 p-1; }
+  .seg-btn { @apply rounded-lg px-3 py-1.5 text-sm font-semibold text-ink-soft transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40; }
+  .seg-btn[aria-pressed="true"] { @apply bg-accent text-paper; }
 }
