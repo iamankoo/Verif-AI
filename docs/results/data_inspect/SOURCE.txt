@@ -1,0 +1,4 @@
+data_inspect_v1_summary.json : statistics from the first (complete) run of the private Kaggle notebook iamankoo/verif-ai-data-inspect (version 1, 1211 s, CPU).
+  It profiled 916,062 images in 26 folders of four third-party datasets and wrote only a 13.66 kB JSON; no images or crops were exported. The values were read from the notebook output page.
+data_inspect_v2_truncated.json : output of the time-budgeted second version (partial: 7 folders of one dataset, truncated by design). Kept as evidence only.
+Kaggle-listed licences are the uploaders' claims and were NOT accepted as proof; see docs/DATASET_LICENCE_REVIEW.md.

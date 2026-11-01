@@ -1,0 +1,216 @@
+{
+ "licences_declared_on_kaggle": {
+  "wish096/realvsfake-81k-by-wish": "CC0: Public Domain",
+  "ajaysonicu/deepfakefusion-399k-realfake-faces": "MIT",
+  "ayushmandatta1/deepdetect-2025": "Apache 2.0",
+  "philosopher0808/real-vs-ai-generated-faces-dataset": "MIT"
+ },
+ "datasets": {
+  "datasets": {
+   "n_images_seen": 198502,
+   "n_leaf_folders_seen": 7,
+   "n_leaf_folders_profiled": 7,
+   "truncated": true,
+   "leaves": {
+    "philosopher0808/real-vs-ai-generated-faces-dataset/data_source/data_source/fake/sfhq/pt1": {
+     "n": 5000,
+     "ext": {
+      ".jpg": 5000
+     },
+     "example_name": "SFHQ_pt1_00019489.jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "height_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "kb_p10_50_90": [
+      17.2,
+      22.7,
+      27.1
+     ],
+     "lap_var_p10_50_90": [
+      25.6,
+      67.6,
+      145.8
+     ]
+    },
+    "philosopher0808/real-vs-ai-generated-faces-dataset/data_source/data_source/fake/sfhq/pt2": {
+     "n": 5000,
+     "ext": {
+      ".jpg": 5000
+     },
+     "example_name": "SFHQ_pt2_00011230.jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "height_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "kb_p10_50_90": [
+      17.2,
+      21.4,
+      26.3
+     ],
+     "lap_var_p10_50_90": [
+      21.7,
+      54.0,
+      139.3
+     ]
+    },
+    "philosopher0808/real-vs-ai-generated-faces-dataset/data_source/data_source/fake/sfhq/pt3": {
+     "n": 5000,
+     "ext": {
+      ".jpg": 5000
+     },
+     "example_name": "SFHQ_pt3_00004319.jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "height_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "kb_p10_50_90": [
+      20.9,
+      26.5,
+      33.7
+     ],
+     "lap_var_p10_50_90": [
+      29.7,
+      105.9,
+      281.1
+     ]
+    },
+    "philosopher0808/real-vs-ai-generated-faces-dataset/data_source/data_source/fake/stable_diffusion": {
+     "n": 1031,
+     "ext": {
+      ".jpg": 1031
+     },
+     "example_name": "image_561.jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "height_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "kb_p10_50_90": [
+      17.4,
+      22.5,
+      28.7
+     ],
+     "lap_var_p10_50_90": [
+      28.9,
+      70.0,
+      163.8
+     ]
+    },
+    "philosopher0808/real-vs-ai-generated-faces-dataset/data_source/data_source/fake/thispersondoesnotexist": {
+     "n": 20499,
+     "ext": {
+      ".jpg": 20499
+     },
+     "example_name": "1dea1e33f3f197832dd6efa93ffbc0cdc49af22f",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "height_p10_50_90": [
+      512.0,
+      512.0,
+      512.0
+     ],
+     "kb_p10_50_90": [
+      25.5,
+      29.8,
+      36.4
+     ],
+     "lap_var_p10_50_90": [
+      92.8,
+      161.0,
+      285.6
+     ]
+    },
+    "wish096/realvsfake-81k-by-wish/RealVsFake/RealVsFake/Fake": {
+     "n": 80972,
+     "ext": {
+      ".jpg": 80001,
+      ".png": 971
+     },
+     "example_name": "FSG (51815).jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      299.0,
+      299.0,
+      299.0
+     ],
+     "height_p10_50_90": [
+      299.0,
+      299.0,
+      299.0
+     ],
+     "kb_p10_50_90": [
+      28.9,
+      34.5,
+      40.1
+     ],
+     "lap_var_p10_50_90": [
+      290.8,
+      505.1,
+      779.6
+     ]
+    },
+    "wish096/realvsfake-81k-by-wish/RealVsFake/RealVsFake/Real": {
+     "n": 81000,
+     "ext": {
+      ".jpg": 40500,
+      ".png": 40500
+     },
+     "example_name": "RCA (27392).jpg",
+     "n_sampled": 60,
+     "width_p10_50_90": [
+      299.0,
+      299.0,
+      299.0
+     ],
+     "height_p10_50_90": [
+      299.0,
+      299.0,
+      299.0
+     ],
+     "kb_p10_50_90": [
+      20.8,
+      28.6,
+      39.1
+     ],
+     "lap_var_p10_50_90": [
+      37.6,
+      253.5,
+      822.6
+     ]
+    }
+   }
+  }
+ }
+}
