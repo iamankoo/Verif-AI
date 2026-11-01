@@ -1,0 +1,60 @@
+# ---- secrets / environment (only *.example files are tracked) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*aau_token*
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+backend/venv/
+*.egg-info/
+
+# ---- data, runtime output, experiment artefacts (never committed) ----
+backend/data/
+backend/storage/
+backend/runs/
+backend/legacy_raw_videos/
+processed/
+raw_videos/
+new_test_data/
+sample_video/
+*.log
+
+# ---- private reference media / local test scaffolding ----
+reference_tests/
+image6.3.png
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# ---- Node / frontend ----
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# face montages of real/celebrity identities from the evaluation data: local only (privacy), regenerate with training.evaluate
+docs/figures/**/examples_*.png
+
+# Kaggle upload staging (contains face crops)
+kaggle/dist/
+kaggle/out/
+
+# superseded intermediate checkpoints (epochs 1-9) of the original prototype: kept locally as backups, not published
+backend/models/two_stream_model_epoch_[1-9].pth
+
+# report on the owner's private reference photo/video: local only
+docs/project-analysis/REFERENCE_MEDIA_TEST_REPORT.md
