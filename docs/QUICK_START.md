@@ -1,0 +1,68 @@
+# Quick Start
+
+Short version for Windows PowerShell. Full explanations: [USER_RUNNING_GUIDE.md](USER_RUNNING_GUIDE.md). Demonstration steps: [IMAGE_VIDEO_DEMONSTRATION_GUIDE.md](IMAGE_VIDEO_DEMONSTRATION_GUIDE.md).
+
+Verif-AI runs on **CPU** (no GPU needed). Tested with Python 3.10 and Node.js 24 / npm 11. No API keys or environment variables are required.
+
+## A. First time only (about 10–20 minutes, needs internet)
+```powershell
+git clone https://github.com/iamankoo/Verif-AI.git
+cd Verif-AI
+
+# backend
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+# frontend (build once; the backend will serve it)
+cd ..\frontend
+npm ci
+npm run build
+cd ..
+```
+If PowerShell refuses to run `Activate.ps1` (script execution disabled), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same window and try again.
+
+## B. Every time you want to run it (one terminal)
+```powershell
+cd Verif-AI\backend
+.\.venv\Scripts\Activate.ps1
+$env:VERIFAI_FRONTEND_DIR = "..\frontend\dist"
+python -m uvicorn verifai.api.app:app --host 127.0.0.1 --port 8000
+```
+Wait for the line `Application startup complete.`, then open **http://127.0.0.1:8000** in Chrome/Edge. Keep this terminal open. Stop with `Ctrl+C`.
+
+Other URLs: health check http://127.0.0.1:8000/api/health · API documentation http://127.0.0.1:8000/docs
+
+> Do **not** run `npm run dev` for the demo unless you want development mode (see the running guide, §C). With the command above the UI and the API are the same program on port 8000.
+
+## C. Test an image (1 minute)
+1. Open http://127.0.0.1:8000 → click **Browse files** (or drag a file into the dashed box).
+2. Pick a `.jpg`/`.png` containing one face from anywhere on your laptop.
+3. Click **Analyse image**.
+4. Read the verdict badge (REAL / FAKE / INCONCLUSIVE), the Real/Fake scores, and the face box with the Grad-CAM heat-map.
+5. Click **Download forensic report (PDF)**.
+
+## D. Test a video (2–3 minutes)
+1. Same page → **Browse files** → pick an `.mp4` (or `.avi .mov .mkv .webm .m4v`) containing a face, up to 200 MB.
+2. Click **Analyse video** → a progress panel shows the stage; wait until the result page appears (a few seconds to some minutes on CPU).
+3. Read the verdict, frame timeline, suspicious timestamps, face tracks and highest-scoring frames; download the PDF.
+
+## E. Check that the model file is there
+```powershell
+cd Verif-AI
+Test-Path backend\models\verifai_v2_best.pth        # should print True
+(Get-FileHash backend\models\verifai_v2_best.pth -Algorithm SHA256).Hash   # should end ...a370d7 (3B94775581931210...)
+```
+Full expected hash: `3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7` (case-insensitive).
+
+## F. If something fails
+| Symptom | Quick fix |
+|---|---|
+| `Cannot reach the Verif-AI server. Is the backend running?` in the browser | Start the backend (section B) and refresh |
+| `Address already in use` / port 8000 busy | Use `--port 8001` and open http://127.0.0.1:8001 |
+| Page shows `{"detail":"Not Found"}` at `/` | `VERIFAI_FRONTEND_DIR` was not set in that terminal, or `npm run build` was not run |
+| Health shows `degraded` | Model file missing/corrupt – see the running guide, §D |
+
+Results are model-based evidence, not proof. Read the limitations in [EXAMINER_DEMONSTRATION_GUIDE.md](EXAMINER_DEMONSTRATION_GUIDE.md) before presenting.
