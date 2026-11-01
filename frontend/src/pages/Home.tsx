@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "../api";
+import { IconImage, IconVideo } from "../components/Icons";
 import { ErrorBanner, HistoryList, ModelCard, ProgressPanel } from "../components/Panels";
 import { UploadZone } from "../components/UploadZone";
 import { fmtBytes, type Kind } from "../lib/format";
+import { loadRecent, remember } from "../lib/history";
 import type { AnalysisSummary, Health, ModelResponse } from "../types";
 
 interface Selected {
@@ -23,7 +25,7 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
     let alive = true;
     api.health().then((h) => alive && setHealth(h)).catch(() => alive && setError("Cannot reach the Verif-AI server. Is the backend running?"));
     api.model().then((m) => alive && setInfo(m)).catch(() => undefined);
-    api.list().then((l) => alive && setHistory(l)).catch(() => undefined);
+    loadRecent().then((l) => alive && setHistory(l)).catch(() => undefined);
     return () => {
       alive = false;
     };
@@ -44,9 +46,11 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
       const onProgress = (f: number) => setBusy({ phase: f >= 1 ? "analysing" : "uploading", progress: f });
       if (sel.kind === "image") {
         const r = await api.analyzeImage(sel.file, onProgress);
+        remember(r.analysis_id);
         onOpen(r.analysis_id);
       } else {
         const j = await api.analyzeVideo(sel.file, onProgress);
+        remember(j.analysis_id);
         onOpen(j.analysis_id);
       }
     } catch (e) {
@@ -58,56 +62,57 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
   const modelReady = health ? health.model_loaded : true;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5">
-      <div className="space-y-5 lg:col-span-3">
-        <section className="card p-6">
-          <h1 className="text-3xl">See beyond the pixels.</h1>
-          <p className="mt-2 max-w-2xl text-ink-soft">
-            Upload a photo or video of a person. Verif-AI detects faces, analyses them with a two-stream deep-learning model, highlights the evidence and produces a forensic report. It runs entirely on this server - nothing is sent to third-party AI services.
-          </p>
-        </section>
+    <div className="space-y-8 pb-4">
+      <section className="mx-auto max-w-6xl pt-2 text-center">
+        <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[2.6rem]">
+          See Beyond the Pixels. <span className="text-accent">Verify What&apos;s Real.</span>
+        </h1>
+        <p className="mx-auto mt-4 max-w-3xl text-base text-ink-soft sm:text-lg">
+          Analyze images and videos with AI-powered facial forensics. Detect suspicious manipulation, inspect visual evidence and generate detailed forensic reports.
+        </p>
+      </section>
 
-        {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
-
-        {busy ? (
-          <ProgressPanel
-            stage={busy.phase}
-            progress={busy.phase === "uploading" ? busy.progress : 1}
-            label={busy.phase === "uploading" ? `Uploading ${sel?.file.name}` : "Analysing - this can take a while for videos..."}
-          />
-        ) : (
-          <>
-            <UploadZone limits={info?.limits} disabled={!modelReady} onSelect={choose} onError={setError} />
-            {sel && (
-              <section className="card p-5" data-testid="preview">
-                <div className="flex flex-wrap items-start gap-5">
-                  <div className="w-full max-w-xs overflow-hidden rounded-lg bg-paper">
-                    {sel.kind === "image" ? (
-                      <img src={sel.url} alt="Selected file preview" className="max-h-64 w-full object-contain" />
-                    ) : (
-                      <video src={sel.url} controls muted className="max-h-64 w-full" aria-label="Selected video preview" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="break-all font-medium">{sel.file.name}</p>
-                    <p className="text-sm text-ink-mute">{sel.kind} &middot; {fmtBytes(sel.file.size)}</p>
-                    <div className="mt-4 flex gap-2">
-                      <button className="btn-primary" onClick={analyse} disabled={!modelReady}>Analyse {sel.kind}</button>
-                      <button className="btn-secondary" onClick={() => setSel(null)}>Remove</button>
-                    </div>
-                    <p className="mt-3 text-xs text-ink-mute">Uploaded files are deleted right after analysis; only derived evidence images and results are kept, for {info?.limits.retention_hours ?? 72} hours.</p>
-                  </div>
+      <section className="mx-auto w-full max-w-5xl" aria-label="Upload">
+        {error && <div className="mb-4"><ErrorBanner message={error} onClose={() => setError(null)} /></div>}
+        <div className="card-glow p-4 sm:p-6">
+          {busy ? (
+            <ProgressPanel
+              stage={busy.phase}
+              progress={busy.phase === "uploading" ? busy.progress : 1}
+              label={busy.phase === "uploading" ? `Uploading ${sel?.file.name}` : "Analysing - this can take a while for videos..."}
+            />
+          ) : sel ? (
+            <section data-testid="preview">
+              <div className="flex flex-wrap items-start gap-5">
+                <div className="w-full max-w-sm overflow-hidden rounded-xl border border-paper-line bg-paper">
+                  {sel.kind === "image" ? (
+                    <img src={sel.url} alt="Selected file preview" className="max-h-72 w-full object-contain" />
+                  ) : (
+                    <video src={sel.url} controls muted className="max-h-72 w-full" aria-label="Selected video preview" />
+                  )}
                 </div>
-              </section>
-            )}
-          </>
-        )}
-      </div>
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-2 text-sm text-accent">{sel.kind === "image" ? <IconImage className="h-4 w-4" /> : <IconVideo className="h-4 w-4" />} {sel.kind === "image" ? "Image detected" : "Video detected"}</p>
+                  <p className="mt-1 break-all text-lg font-semibold">{sel.file.name}</p>
+                  <p className="text-sm text-ink-mute">{sel.kind} &middot; {fmtBytes(sel.file.size)}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button className="btn-primary" onClick={analyse} disabled={!modelReady}>Analyse {sel.kind}</button>
+                    <button className="btn-secondary" onClick={() => setSel(null)}>Remove</button>
+                  </div>
+                  <p className="mt-3 text-xs text-ink-mute">Uploaded files are deleted right after analysis; only derived evidence images and results are kept, for {info?.limits.retention_hours ?? 72} hours.</p>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <UploadZone limits={info?.limits} disabled={!modelReady} onSelect={choose} onError={setError} />
+          )}
+        </div>
+      </section>
 
-      <aside className="space-y-5 lg:col-span-2">
-        <ModelCard info={info} health={health} />
-        <HistoryList items={history} onOpen={onOpen} />
-      </aside>
+      <section className="grid gap-5 lg:grid-cols-2" aria-label="Model and history">
+        <ModelCard info={info} health={health} compact />
+        <HistoryList items={history} onOpen={onOpen} limit={5} viewAllHref="#/reports" />
+      </section>
     </div>
   );
 }

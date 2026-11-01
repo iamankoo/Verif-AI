@@ -1,6 +1,12 @@
 import type { AnalysisResult, AnalysisSummary, Health, JobState, ModelResponse } from "./types";
 
-const BASE = `${import.meta.env.VITE_API_BASE ?? ""}/api`;
+/** Backend origin for production builds, e.g. https://verifai-api.onrender.com (no trailing slash needed). Empty = same origin (dev proxy / single-container deployment).
+ *  VITE_API_BASE_URL is the documented name; VITE_API_BASE is still read for older setups. These values are public (they are baked into the bundle): never put secrets here. */
+export function apiBase(env: Record<string, unknown> = import.meta.env): string {
+  const raw = String(env.VITE_API_BASE_URL ?? env.VITE_API_BASE ?? "").trim();
+  return `${raw.replace(/\/+$/, "")}/api`;
+}
+const BASE = apiBase();
 
 export class ApiError extends Error {
   status: number;

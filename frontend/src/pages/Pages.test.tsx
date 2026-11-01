@@ -80,7 +80,7 @@ describe("Home", () => {
     render(<Home onOpen={() => undefined} />);
     expect(await screen.findByText(/model is not loaded/i)).toBeInTheDocument();
     expect(screen.getByText(/no checkpoint/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /browse files/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /choose file/i })).toBeDisabled();
   });
 
   it("tells the user when the backend is unreachable", async () => {
