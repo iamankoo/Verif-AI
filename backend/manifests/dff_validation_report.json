@@ -1,0 +1,90 @@
+{
+  "input_manifest": "manifests/dff_raw_manifest.csv",
+  "total_raw_images": 4100,
+  "faces_kept": 3937,
+  "detection_failures": {
+    "train|real|no_face": 30,
+    "train|fake|no_face": 55,
+    "val|fake|no_face": 18,
+    "val|real|no_face": 9,
+    "test_internal|real|no_face": 6,
+    "test_internal|fake|no_face": 15,
+    "test_crossgen|real|no_face": 18,
+    "test_crossgen|fake|no_face": 12
+  },
+  "mtcnn": {
+    "image_size": 224,
+    "margin": 20,
+    "selection": "largest face",
+    "device": "cpu"
+  },
+  "crop_jpeg_quality": 95,
+  "group_violations_identity": [],
+  "group_violations_pair_id": [],
+  "duplicates": {
+    "exact_pairs": 4,
+    "near_pairs": 7,
+    "cross_split_pairs": 8,
+    "max_hamming": 4
+  },
+  "dropped_cross_split_duplicates": [
+    "data/crops/test_crossgen/fake/text2img__72_44976672_1988-05-24_2013.jpg",
+    "data/crops/test_crossgen/real/wiki__24_46568824_1988-01-21_2014.jpg",
+    "data/crops/test_internal/fake/inpainting__07_7590007_1983-05-30_2011.jpg",
+    "data/crops/test_internal/fake/insight__70_28541070_1964-05-27_2012.jpg",
+    "data/crops/test_internal/real/wiki__24_1594324_1900-06-21_1951.jpg",
+    "data/crops/test_internal/real/wiki__71_31708971_1991-04-01_2011.jpg",
+    "data/crops/val/real/wiki__08_39753408_1989-07-13_2011.jpg",
+    "data/crops/val/real/wiki__34_1290034_1968-12-08_2012.jpg"
+  ],
+  "distribution_after_validation": {
+    "train": {
+      "real": 1170,
+      "fake": 1145,
+      "gen:inpainting": 561,
+      "gen:insight": 584
+    },
+    "val": {
+      "real": 239,
+      "fake": 232,
+      "gen:inpainting": 116,
+      "gen:insight": 116
+    },
+    "test_internal": {
+      "real": 292,
+      "fake": 283,
+      "gen:insight": 142,
+      "gen:inpainting": 141
+    },
+    "test_crossgen": {
+      "real": 281,
+      "fake": 287,
+      "gen:text2img": 287
+    }
+  },
+  "shortcut_diagnostics_note": "AUC of a single scalar (file size) as a real/fake predictor. 0.5 = no signal; values far from 0.5 mean the classes differ in compression, which a network could exploit instead of manipulation traces.",
+  "shortcut_diagnostics": {
+    "test_crossgen": {
+      "auc_raw_file_bytes": 0.2925,
+      "auc_crop_jpeg_bytes": 0.6206
+    },
+    "test_internal": {
+      "auc_raw_file_bytes": 0.2489,
+      "auc_crop_jpeg_bytes": 0.3414
+    },
+    "train": {
+      "auc_raw_file_bytes": 0.2791,
+      "auc_crop_jpeg_bytes": 0.3155
+    },
+    "val": {
+      "auc_raw_file_bytes": 0.2953,
+      "auc_crop_jpeg_bytes": 0.3495
+    }
+  },
+  "identities_per_split": {
+    "test_crossgen": 300,
+    "test_internal": 300,
+    "train": 1197,
+    "val": 249
+  }
+}
