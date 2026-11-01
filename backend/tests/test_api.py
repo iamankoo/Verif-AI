@@ -139,3 +139,21 @@ def test_cors_headers(client):
     r = client.options("/api/health", headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "GET"})
     assert r.headers.get("access-control-allow-origin") == "http://localhost:5173"
     assert client.get("/api/health").headers["x-content-type-options"] == "nosniff"
+
+
+def test_public_history_switch_hides_the_global_list_but_not_individual_results(random_bundle, tmp_path):
+    """Public deployments set VERIFAI_PUBLIC_HISTORY=false: nobody can enumerate other visitors' analyses, but a result is still reachable by its own id."""
+    s = Settings(storage_dir=tmp_path / "st2", device="cpu", max_image_mb=1.0, public_history=False)
+    eng = Engine(random_bundle, s)
+    eng.detector = StubDetector([[BOX]])
+    with TestClient(create_app(s, eng)) as c:
+        d = c.post("/api/analyze/image", files={"file": ("a.png", png_bytes(tmp_path), "image/png")}).json()
+        assert c.get("/api/analyses").json() == []
+        assert c.get(f"/api/analyses/{d['analysis_id']}").json()["analysis_id"] == d["analysis_id"]
+        assert c.delete(f"/api/analyses/{d['analysis_id']}").status_code == 204
+    eng.shutdown()
+
+
+def test_public_history_env_switch():
+    assert Settings.from_env({}).public_history is True
+    assert Settings.from_env({"VERIFAI_PUBLIC_HISTORY": "false"}).public_history is False

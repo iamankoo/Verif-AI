@@ -70,6 +70,7 @@ class Settings:
     result_ttl_hours: float = 72.0
     infer_batch_size: int = 16
     api_prefix: str = "/api"
+    public_history: bool = True               # False on public deployments: GET /api/analyses returns [] (results stay reachable only by their unguessable id)
     serve_frontend_dir: Optional[Path] = None
 
     @staticmethod
@@ -94,5 +95,6 @@ class Settings:
             video_aggregation=g("VERIFAI_VIDEO_AGGREGATION", s.video_aggregation),
             enable_heatmaps=_b(g("VERIFAI_ENABLE_HEATMAPS", s.enable_heatmaps)),
             result_ttl_hours=float(g("VERIFAI_RESULT_TTL_HOURS", s.result_ttl_hours)),
+            public_history=_b(g("VERIFAI_PUBLIC_HISTORY", s.public_history)),
             serve_frontend_dir=Path(fe) if fe else None,
         )

@@ -144,6 +144,10 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @api.get("/analyses", response_model=List[AnalysisSummary], tags=["analysis"])
     def list_analyses(limit: int = 50):
+        # On a public deployment the global list would reveal other visitors' file names and verdicts, so it is switched off there
+        # (VERIFAI_PUBLIC_HISTORY=false); individual results remain reachable only through their unguessable 128-bit id.
+        if not settings.public_history:
+            return []
         return eng().store.list_summaries(max(1, min(limit, 200)))
 
     @api.get("/analyses/{analysis_id}/status", response_model=JobState, tags=["analysis"])
