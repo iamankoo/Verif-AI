@@ -1,0 +1,7 @@
+{
+  "gpu": "Tesla T4",
+  "batch": 32,
+  "images_per_second": 273.8,
+  "ms_per_batch": 116.9,
+  "peak_gpu_mem_mb": 589
+}

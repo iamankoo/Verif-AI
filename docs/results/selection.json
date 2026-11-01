@@ -1,0 +1,43 @@
+{
+  "selected": "v2_B_imagenetInit",
+  "criterion": "best validation ROC-AUC",
+  "table": [
+    {
+      "run": "v2_A_origInit",
+      "best_epoch": 11,
+      "val_auc": 0.9235319578704371,
+      "val_acc": 0.851380042462845,
+      "test_internal_acc": 0.8365217391304348,
+      "test_internal_auc": 0.9149523210223147,
+      "test_crossgen_acc": 0.7147887323943662,
+      "test_crossgen_auc": 0.8436519647352041
+    },
+    {
+      "run": "v2_B_imagenetInit",
+      "best_epoch": 9,
+      "val_auc": 0.9477438320588659,
+      "val_acc": 0.8768577494692145,
+      "test_internal_acc": 0.8747826086956522,
+      "test_internal_auc": 0.9409700372718912,
+      "test_crossgen_acc": 0.7464788732394366,
+      "test_crossgen_auc": 0.8492318375141047
+    },
+    {
+      "run": "v2_C_origInit_noAug",
+      "best_epoch": 15,
+      "val_auc": 0.928437454912711,
+      "val_acc": 0.8598726114649682,
+      "test_internal_acc": 0.8539130434782609,
+      "test_internal_auc": 0.926448521225616,
+      "test_crossgen_acc": 0.7235915492957746,
+      "test_crossgen_auc": 0.847905067764455
+    }
+  ],
+  "env": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda_available": true,
+    "gpu": "Tesla T4",
+    "cuda": "12.8"
+  }
+}

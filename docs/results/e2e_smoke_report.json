@@ -1,0 +1,277 @@
+{
+  "base_url": "http://127.0.0.1:51740",
+  "checks": [
+    {
+      "check": "health: model loaded",
+      "passed": true,
+      "detail": "{'status': 'ok', 'model_loaded': True, 'device': 'cpu', 'version': '1.0.0', 'detail': None}"
+    },
+    {
+      "check": "model info available",
+      "passed": true,
+      "detail": "verifai-two-stream-v2_B_imagenetInit v2.0 on cpu"
+    },
+    {
+      "check": "image [known real photo] analysed",
+      "passed": true,
+      "detail": "HTTP 200, 0.6s"
+    },
+    {
+      "check": "image [known real photo] evidence image served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known real photo] Grad-CAM heat-map served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known real photo] PDF report",
+      "passed": true,
+      "detail": "108160 bytes"
+    },
+    {
+      "check": "image [known fake (seen generator)] analysed",
+      "passed": true,
+      "detail": "HTTP 200, 0.4s"
+    },
+    {
+      "check": "image [known fake (seen generator)] evidence image served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known fake (seen generator)] Grad-CAM heat-map served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known fake (seen generator)] PDF report",
+      "passed": true,
+      "detail": "81035 bytes"
+    },
+    {
+      "check": "image [known fake (UNSEEN generator text2img)] analysed",
+      "passed": true,
+      "detail": "HTTP 200, 0.4s"
+    },
+    {
+      "check": "image [known fake (UNSEEN generator text2img)] evidence image served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known fake (UNSEEN generator text2img)] Grad-CAM heat-map served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "image [known fake (UNSEEN generator text2img)] PDF report",
+      "passed": true,
+      "detail": "108856 bytes"
+    },
+    {
+      "check": "invalid upload (.py) rejected with 415",
+      "passed": true,
+      "detail": "415"
+    },
+    {
+      "check": "corrupt image rejected with 422",
+      "passed": true,
+      "detail": "422"
+    },
+    {
+      "check": "image without a face -> INCONCLUSIVE (not an error)",
+      "passed": true,
+      "detail": "200"
+    },
+    {
+      "check": "video [real photos slideshow] accepted (202)",
+      "passed": true,
+      "detail": "202"
+    },
+    {
+      "check": "video [real photos slideshow] completed",
+      "passed": true,
+      "detail": "completed in 7.2s "
+    },
+    {
+      "check": "video [real photos slideshow] analysed many frames (not only frame 0)",
+      "passed": true,
+      "detail": "24 sampled, 24 with faces"
+    },
+    {
+      "check": "video [real photos slideshow] evidence frame served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "video [real photos slideshow] PDF report",
+      "passed": true,
+      "detail": "680432 bytes"
+    },
+    {
+      "check": "video [fake faces slideshow] accepted (202)",
+      "passed": true,
+      "detail": "202"
+    },
+    {
+      "check": "video [fake faces slideshow] completed",
+      "passed": true,
+      "detail": "completed in 7.2s "
+    },
+    {
+      "check": "video [fake faces slideshow] analysed many frames (not only frame 0)",
+      "passed": true,
+      "detail": "24 sampled, 24 with faces"
+    },
+    {
+      "check": "video [fake faces slideshow] evidence frame served",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "video [fake faces slideshow] PDF report",
+      "passed": true,
+      "detail": "565021 bytes"
+    },
+    {
+      "check": "delete analysis (204) then 404",
+      "passed": true,
+      "detail": "204"
+    }
+  ],
+  "analyses": [
+    {
+      "tag": "known real photo",
+      "ground_truth": "real",
+      "generator": "real",
+      "media": "image",
+      "classification": "REAL",
+      "fake_probability": 0.19740216434001923,
+      "faces": 1,
+      "seconds": 0.56,
+      "id": "47479d687db84713b9b15a294d5b44fb"
+    },
+    {
+      "tag": "known fake (seen generator)",
+      "ground_truth": "fake",
+      "generator": "insight",
+      "media": "image",
+      "classification": "FAKE",
+      "fake_probability": 0.9999089241027832,
+      "faces": 1,
+      "seconds": 0.4,
+      "id": "d5ab82792f424c9a80133b11fdc16c5b"
+    },
+    {
+      "tag": "known fake (UNSEEN generator text2img)",
+      "ground_truth": "fake",
+      "generator": "text2img",
+      "media": "image",
+      "classification": "FAKE",
+      "fake_probability": 0.9998413324356079,
+      "faces": 1,
+      "seconds": 0.42,
+      "id": "72feee84e2814e4ebe33fbe61e842411"
+    },
+    {
+      "tag": "real photos slideshow",
+      "ground_truth": "real photographs (not a real video)",
+      "media": "SLIDESHOW video (functional test only)",
+      "classification": "FAKE",
+      "fake_probability": 0.8961944580078125,
+      "frames_sampled": 24,
+      "frames_with_faces": 24,
+      "tracks": 4,
+      "suspicious_segments": 3,
+      "seconds": 7.2,
+      "id": "db034b7bf1e347a49c054db4e2a01a74",
+      "frame_scores": [
+        0.9473,
+        0.9968,
+        0.994,
+        0.994,
+        0.6439,
+        0.4783,
+        0.4583,
+        0.4583,
+        0.2695,
+        0.3266,
+        0.5921,
+        0.4396,
+        0.8374,
+        0.7136,
+        0.7571,
+        0.7635,
+        0.8241,
+        0.8962,
+        0.8962,
+        0.8962,
+        0.982,
+        0.9667,
+        0.7993,
+        0.7862
+      ]
+    },
+    {
+      "tag": "fake faces slideshow",
+      "ground_truth": "generated faces (not a real deepfake video)",
+      "media": "SLIDESHOW video (functional test only)",
+      "classification": "FAKE",
+      "fake_probability": 0.9995258450508118,
+      "frames_sampled": 24,
+      "frames_with_faces": 24,
+      "tracks": 3,
+      "suspicious_segments": 1,
+      "seconds": 7.2,
+      "id": "94a42aa44f6e4440860e54970d7ba2ef",
+      "frame_scores": [
+        0.9888,
+        0.9953,
+        0.9917,
+        0.9917,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.9997,
+        0.9999,
+        0.9997,
+        0.9998,
+        0.9993,
+        0.9988,
+        0.999,
+        0.9993,
+        0.8764,
+        0.823,
+        0.877,
+        0.877,
+        0.9995,
+        0.9995,
+        0.9995,
+        0.9996
+      ]
+    }
+  ],
+  "model": {
+    "name": "verifai-two-stream-v2_B_imagenetInit",
+    "version": "2.0",
+    "architecture": "Two-stream EfficientNet-B0 (RGB + SRM-style noise residual), late fusion",
+    "checkpoint_file": "verifai_v2_best.pth",
+    "checkpoint_sha256": "3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7",
+    "parameters": 11972954,
+    "device": "cpu",
+    "input_size": 224,
+    "decision_threshold": 0.5,
+    "trained_on": "DeepFakeFace sample (manifests/dff_faces_manifest.csv); splits ['train']",
+    "training_notes": "fine-tuned 15 max epochs, AdamW lr 0.0001, BCEWithLogits pos_weight 1.02, augmentation on",
+    "metrics_note": "Validation metrics only (identity-disjoint). See docs/MODEL_EVALUATION_REPORT.md for test results."
+  },
+  "summary": {
+    "checks": 28,
+    "passed": 28,
+    "failed": 0
+  }
+}
