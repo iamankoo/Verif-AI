@@ -1,0 +1,37 @@
+# Render Blueprint for the Verif-AI API (FastAPI + PyTorch CPU inference). The React UI is hosted separately on Vercel.
+# Measured on a laptop: ~490 MB idle after loading the model, ~780 MB peak for one image analysis with Grad-CAM, >820 MB while analysing a video.
+# A 512 MB plan cannot run it; use a plan with at least 2 GB RAM. A persistent disk (paid plans only) keeps results and the model checkpoint across deploys.
+services:
+  - type: web
+    name: verifai-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: standard
+    autoDeploy: false
+    healthCheckPath: /api/health
+    disk:
+      name: verifai-data
+      mountPath: /data
+      sizeGB: 2
+    envVars:
+      # Model 4 is not stored in Git. It lives on the persistent disk and is copied there once (see docs/DEPLOYMENT.md).
+      - key: VERIFAI_MODEL_PATH
+        value: /data/models/verifai_v3_celebdf_qa.pth
+      - key: VERIFAI_STORAGE_DIR
+        value: /data/storage
+      - key: VERIFAI_DEVICE
+        value: cpu
+      # Public deployment: do not let visitors list each other's analyses (each browser keeps its own history).
+      - key: VERIFAI_PUBLIC_HISTORY
+        value: "false"
+      - key: VERIFAI_RESULT_TTL_HOURS
+        value: "24"
+      - key: VERIFAI_MAX_IMAGE_MB
+        value: "15"
+      - key: VERIFAI_MAX_VIDEO_MB
+        value: "100"
+      - key: VERIFAI_VIDEO_MAX_DURATION_S
+        value: "120"
+      # The real Vercel origin(s), comma separated, no trailing slash. Set in the dashboard after the frontend project exists.
+      - key: VERIFAI_CORS_ORIGINS
+        sync: false

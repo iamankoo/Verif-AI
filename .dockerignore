@@ -19,3 +19,8 @@ docs
 .env
 .env.*
 !.env.example
+
+assets
+kaggle
+image6.3.png
+Phases.md
