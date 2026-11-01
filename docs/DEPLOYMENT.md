@@ -29,6 +29,10 @@ No secret is required by the application. Nothing in the repository is a credent
 * Image analysis is synchronous (about 1-2 s on CPU); video analysis is a background job the browser polls, so HTTP request time limits are not a problem for videos. A single instance processes video jobs one after another; add instances only after adding shared storage.
 * Uploads are deleted right after analysis; evidence images and results stay until the TTL or until the user deletes them.
 
+## Free-tier ("lite") mode on Render
+Render's free instance has 512 MB RAM, no persistent disk and spins down when idle (a cold start can take about a minute). Measured on a laptop with the CPU model loaded: idle about 490 MB; with Grad-CAM enabled a single image peaks near 670-780 MB and a video near 1.5 GB; with Grad-CAM disabled, small batches and one thread an image peaks near 510 MB and a short video near 580 MB. A default-configured free instance is killed during the first analysis (HTTP 502). The free tier therefore needs lite mode, and it cannot provide Grad-CAM heat-maps:
+`VERIFAI_ENABLE_HEATMAPS=false`, `VERIFAI_INFER_BATCH_SIZE=2`, `VERIFAI_VIDEO_BATCH_SIZE=2`, `OMP_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, `MALLOC_ARENA_MAX=2`, `VERIFAI_VIDEO_MAX_FRAMES=12`, small upload limits. With no persistent disk the model must be the checkpoint inside the repository (v2, `/app/models/verifai_v2_best.pth`), and results disappear on every restart. Full functionality (Model 4, heat-maps, video evidence, durable results) needs a plan with at least 2 GB RAM and a disk, as described below.
+
 ## One-time Render setup
 1. Create the web service from `render.yaml` (Blueprint) on the branch you deploy. Plan with >= 2 GB RAM, a 2 GB disk mounted at `/data`.
 2. Put the Model 4 checkpoint on the disk. It is intentionally not in Git (checkpoints are never committed and the repository is public). Copy it once with Render's SSH/SCP support: `scp <path>/verifai_v3_celebdf_qa.pth <service>@ssh.<region>.render.com:/data/models/` (create `/data/models` first). Verify the hash with `sha256sum` and with `GET /api/model` (`checkpoint_sha256` must start `e7e5f3dc28b2`).

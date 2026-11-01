@@ -157,3 +157,10 @@ def test_public_history_switch_hides_the_global_list_but_not_individual_results(
 def test_public_history_env_switch():
     assert Settings.from_env({}).public_history is True
     assert Settings.from_env({"VERIFAI_PUBLIC_HISTORY": "false"}).public_history is False
+
+
+def test_batch_size_env_settings_are_memory_knobs():
+    s = Settings.from_env({"VERIFAI_VIDEO_BATCH_SIZE": "2", "VERIFAI_INFER_BATCH_SIZE": "3"})
+    assert s.video_batch_size == 2 and s.infer_batch_size == 3
+    d = Settings.from_env({})
+    assert d.video_batch_size == 16 and d.infer_batch_size == 16          # defaults unchanged

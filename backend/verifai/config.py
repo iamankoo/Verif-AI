@@ -96,5 +96,7 @@ class Settings:
             enable_heatmaps=_b(g("VERIFAI_ENABLE_HEATMAPS", s.enable_heatmaps)),
             result_ttl_hours=float(g("VERIFAI_RESULT_TTL_HOURS", s.result_ttl_hours)),
             public_history=_b(g("VERIFAI_PUBLIC_HISTORY", s.public_history)),
+            video_batch_size=int(g("VERIFAI_VIDEO_BATCH_SIZE", s.video_batch_size)),       # memory knob only: scores do not depend on the batch size
+            infer_batch_size=int(g("VERIFAI_INFER_BATCH_SIZE", s.infer_batch_size)),
             serve_frontend_dir=Path(fe) if fe else None,
         )
