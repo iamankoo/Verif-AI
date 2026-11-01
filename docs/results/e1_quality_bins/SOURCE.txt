@@ -1,0 +1,1 @@
+35e824e7ef569d3b4b82aa0776a9c71e098a6014cab0e3c5118e8d7769032600  verifai_e1_results.zip (Kaggle notebook iamankoo/verif-ai-e1 v1; 1 JSON; verified no images/media). dff_e1.json produced locally by backend/training/quality_bins.py.
