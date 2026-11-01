@@ -75,6 +75,10 @@ def main():
     ap.add_argument("--workers", type=int, default=0)
     ap.add_argument("--max-minutes", type=float, default=0, help="stop after this wall time (0 = no limit)")
     ap.add_argument("--no-aug", action="store_true")
+    ap.add_argument("--quality-aug", type=float, default=0.0, help="probability of the class-blind quality degradation (blur/down-up/JPEG/noise/low-light); 0 = off")
+    ap.add_argument("--select", default="val_auc", choices=["val_auc", "clean_degraded_mean"],
+                    help="checkpoint/early-stopping criterion, fixed BEFORE training and computed on VALIDATION data only: "
+                         "val_auc = ROC-AUC on clean val; clean_degraded_mean = mean of ROC-AUC on clean val and on the deterministic degraded ('mixed') val")
     ap.add_argument("--limit-train", type=int, default=0, help="debug: use only N training rows")
     ap.add_argument("--limit-val", type=int, default=0, help="debug: use only N validation rows")
     ap.add_argument("--model-version", default="2.0")
@@ -83,7 +87,7 @@ def main():
     seed_everything(a.seed)
     device = resolve_device("auto")
     run = os.path.join(a.out, a.name); os.makedirs(run, exist_ok=True)
-    aug = AugConfig(flip=0.0, jitter=False, blur_p=0.0, jpeg_p=0.0) if a.no_aug else AugConfig()
+    aug = AugConfig(flip=0.0, jitter=False, blur_p=0.0, jpeg_p=0.0) if a.no_aug else AugConfig(quality_p=a.quality_aug)
     train_ds = FaceCropDataset(a.manifest, a.train_splits, train=True, aug=aug)
     val_ds = FaceCropDataset(a.manifest, a.val_splits, train=False)
     if a.limit_train:
@@ -93,6 +97,12 @@ def main():
     g = torch.Generator().manual_seed(a.seed)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=a.batch_size, shuffle=True, num_workers=a.workers, generator=g, drop_last=True)
     val_dl = torch.utils.data.DataLoader(val_ds, batch_size=a.batch_size * 2, shuffle=False, num_workers=a.workers)
+    valdeg_dl = None
+    if a.select == "clean_degraded_mean":
+        valdeg_ds = FaceCropDataset(a.manifest, a.val_splits, train=False, degrade="mixed")
+        if a.limit_val:
+            valdeg_ds.rows = valdeg_ds.rows[: a.limit_val // 2] + valdeg_ds.rows[-(a.limit_val // 2):]
+        valdeg_dl = torch.utils.data.DataLoader(valdeg_ds, batch_size=a.batch_size * 2, shuffle=False, num_workers=a.workers)
 
     model = TwoStreamNet(pretrained=(a.init == "imagenet"))
     if a.init != "imagenet":
@@ -121,7 +131,7 @@ def main():
 
     hist, best_auc, best_epoch, bad = [], -1.0, 0, 0
     t_start = time.time()
-    fields = ["epoch", "lr", "train_loss", "train_acc", "val_loss", "val_acc", "val_auc", "val_f1", "val_fpr", "val_fnr", "epoch_seconds"]
+    fields = ["epoch", "lr", "train_loss", "train_acc", "val_loss", "val_acc", "val_auc", "val_f1", "val_fpr", "val_fnr", "epoch_seconds", "val_degraded_auc", "val_select"]
     with open(os.path.join(run, "history.csv"), "w", newline="") as fh:
         csv.DictWriter(fh, fieldnames=fields).writeheader()
     for epoch in range(1, a.epochs + 1):
@@ -143,9 +153,14 @@ def main():
         yv, pv, vloss = predict(model, val_dl, device)
         m = compute_metrics(yv, pv)
         sched.step(vloss)
+        deg_auc = None
+        if valdeg_dl is not None:
+            ydg, pdg, _ = predict(model, valdeg_dl, device)
+            deg_auc = compute_metrics(ydg, pdg)["roc_auc"]
+        select_value = m["roc_auc"] if deg_auc is None else (m["roc_auc"] + deg_auc) / 2.0
         row = dict(epoch=epoch, lr=opt.param_groups[0]["lr"], train_loss=tl / max(tn, 1), train_acc=tc / max(tn, 1), val_loss=vloss,
                    val_acc=m["accuracy"], val_auc=m["roc_auc"], val_f1=m["f1_fake"], val_fpr=m["false_positive_rate"],
-                   val_fnr=m["false_negative_rate"], epoch_seconds=time.time() - t0)
+                   val_fnr=m["false_negative_rate"], epoch_seconds=time.time() - t0, val_degraded_auc=deg_auc, val_select=select_value)
         hist.append(row)
         with open(os.path.join(run, "history.csv"), "a", newline="") as fh:
             csv.DictWriter(fh, fieldnames=fields).writerow(row)
@@ -163,8 +178,8 @@ def main():
                     metrics_note="Validation metrics only (identity-disjoint). See docs/MODEL_EVALUATION_REPORT.md for test results.",
                     config={k: v for k, v in cfg.items() if k not in ("started",)})
         torch.save({"state_dict": model.state_dict(), "meta": meta}, os.path.join(run, "last.pth"))
-        if m["roc_auc"] is not None and m["roc_auc"] > best_auc:
-            best_auc, best_epoch, bad = m["roc_auc"], epoch, 0
+        if select_value is not None and select_value > best_auc:
+            best_auc, best_epoch, bad = select_value, epoch, 0
             torch.save({"state_dict": model.state_dict(), "meta": meta}, os.path.join(run, "best.pth"))
         else:
             bad += 1
@@ -172,7 +187,7 @@ def main():
                 print(f"early stopping at epoch {epoch} (best epoch {best_epoch}, val AUC {best_auc:.4f})"); break
         if a.max_minutes and (time.time() - t_start) / 60 > a.max_minutes:
             print("time budget reached"); break
-    json.dump(dict(best_epoch=best_epoch, best_val_auc=best_auc, epochs_run=len(hist), minutes=(time.time() - t_start) / 60),
+    json.dump(dict(best_epoch=best_epoch, best_val_auc=best_auc, selection_criterion=a.select, epochs_run=len(hist), minutes=(time.time() - t_start) / 60),
               open(os.path.join(run, "summary.json"), "w"), indent=2)
     print("done. best epoch", best_epoch, "val AUC", best_auc)
 

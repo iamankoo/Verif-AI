@@ -1,0 +1,1 @@
+956ec7d55b2a803b2b75a631c237f4939e4d66285fa367a045d94f2a9c24b923  verifai_analysis_results.zip (Kaggle notebook iamankoo/verif-ai-analysis, version 2; 22 JSON files; verified: no images/crops/media)

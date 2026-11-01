@@ -22,6 +22,7 @@ import torch
 
 from verifai.model import load_model
 
+from .celebdf import video_level
 from .dataset import FaceCropDataset
 from .metrics import compute_metrics, coverage_metrics, grouped_bootstrap_ci
 
@@ -89,6 +90,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--margin", type=float, default=0.15)
     ap.add_argument("--boot", type=int, default=1000)
+    ap.add_argument("--degrade", default="", help="'' (clean), 'mixed' or one name from training/degrade.py: applied identically to every row of every split (robustness evaluation)")
+    ap.add_argument("--no-plots", action="store_true", help="skip plots and example montages (faster; used for the many robustness conditions)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     bundle = load_model(a.checkpoint, "auto")
@@ -97,11 +100,12 @@ def main():
     pred_rows = []
     for spec in a.split:
         split, _, etype = spec.partition(":")
-        ds = FaceCropDataset(a.manifest, [split], train=False)
+        ds = FaceCropDataset(a.manifest, [split], train=False, degrade=a.degrade)
         p = run_model(bundle, ds)
         y = np.array(ds.labels())
         m = compute_metrics(y, p)
         m["evaluation_type"] = etype or split
+        m["degradation"] = a.degrade or "none"
         m["bootstrap"] = grouped_bootstrap_ci(y, p, [r["identity"] for r in ds.rows], a.boot)
         m["abstention"] = coverage_metrics(y, p, a.margin)
         by_gen = defaultdict(list)
@@ -111,11 +115,18 @@ def main():
                                   ("fake_detection_rate" if g != "real" else "real_acceptance_rate"): float(np.mean(np.asarray(v) > 0.5) if g != "real" else np.mean(np.asarray(v) <= 0.5))}
                               for g, v in by_gen.items()}
         m["score_stats"] = {"mean_score_real": float(p[y == 0].mean()), "mean_score_fake": float(p[y == 1].mean())}
+        if any(r.get("video") for r in ds.rows):      # video-level metrics: one score (median of its frames) per video
+            vl = video_level(ds.rows, p, "median")
+            yv = np.array([l for l, _ in vl.values()]); pv = np.array([s for _, s in vl.values()])
+            mv = compute_metrics(yv, pv); mv["aggregation"] = "median of the video's frame scores"
+            m["video_level"] = mv
+            print(f"[{split}] VIDEO-LEVEL n={mv['n']} acc={mv['accuracy']:.4f} auc={mv['roc_auc']} fpr={mv['false_positive_rate']:.4f} fnr={mv['false_negative_rate']:.4f}")
         result["splits"][split] = m
-        plots(y, p, os.path.join(a.out, f"{{k}}_{split}.png"), f"{bundle.info.name} | {split} ({etype or split})")
-        examples(ds.rows, p, os.path.join(a.out, f"examples_{split}.png"))
+        if not a.no_plots:
+            plots(y, p, os.path.join(a.out, f"{{k}}_{split}.png"), f"{bundle.info.name} | {split} ({etype or split})")
+            examples(ds.rows, p, os.path.join(a.out, f"examples_{split}.png"))
         for r, pi in zip(ds.rows, p):
-            pred_rows.append(dict(split=split, crop_path=r["crop_path"], label=r["label"], generator=r["generator"], identity=r["identity"], fake_score=f"{pi:.6f}"))
+            pred_rows.append(dict(split=split, crop_path=r["crop_path"], label=r["label"], generator=r["generator"], identity=r["identity"], video=r.get("video", ""), fake_score=f"{pi:.6f}"))
         print(f"[{split}] n={m['n']} acc={m['accuracy']:.4f} auc={m['roc_auc']} fpr={m['false_positive_rate']:.4f} fnr={m['false_negative_rate']:.4f}")
     json.dump(result, open(os.path.join(a.out, "metrics.json"), "w"), indent=2)
     with open(os.path.join(a.out, "predictions.csv"), "w", newline="") as f:

@@ -1,0 +1,212 @@
+{
+  "checkpoint": "cdf_C1_qa.pth",
+  "checkpoint_sha256": "e7e5f3dc28b252d43e2e9134e7f41185c49526cff5d1c03367d14ae3cf07eafb",
+  "model_name": "verifai-two-stream-v4_C1_celebdf_dff_qualityAug0.5",
+  "device": "cuda",
+  "manifest": "manifests/analysis_manifest.csv",
+  "threshold": 0.5,
+  "splits": {
+    "test_internal": {
+      "n": 575,
+      "n_real": 292,
+      "n_fake": 283,
+      "threshold": 0.5,
+      "accuracy": 0.8347826086956521,
+      "precision_fake": 0.8560606060606061,
+      "recall_fake": 0.7985865724381626,
+      "f1_fake": 0.8263254113345521,
+      "precision_real": 0.8167202572347267,
+      "recall_real": 0.8698630136986302,
+      "roc_auc": 0.9206762185972216,
+      "pr_auc": 0.9253723449530785,
+      "confusion_matrix": {
+        "tn": 254,
+        "fp": 38,
+        "fn": 57,
+        "tp": 226
+      },
+      "false_positive_rate": 0.13013698630136986,
+      "false_negative_rate": 0.20141342756183744,
+      "evaluation_type": "dff_internal_test",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.8034625187406297,
+          0.8617473141045805
+        ],
+        "roc_auc_95ci": [
+          0.8987319075764075,
+          0.9426928239817474
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.9739130434782609,
+        "answered": 560,
+        "accuracy_on_answered": 0.8446428571428571
+      },
+      "per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.1293146014213562,
+          "real_acceptance_rate": 0.8698630136986302
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.7928395867347717,
+          "fake_detection_rate": 0.8098591549295775
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7757419943809509,
+          "fake_detection_rate": 0.7872340425531915
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.1293146014213562,
+        "mean_score_fake": 0.7843210101127625
+      }
+    },
+    "test_crossgen": {
+      "n": 568,
+      "n_real": 281,
+      "n_fake": 287,
+      "threshold": 0.5,
+      "accuracy": 0.6267605633802817,
+      "precision_fake": 0.7777777777777778,
+      "recall_fake": 0.36585365853658536,
+      "f1_fake": 0.4976303317535545,
+      "precision_real": 0.5796766743648961,
+      "recall_real": 0.8932384341637011,
+      "roc_auc": 0.7953798653390702,
+      "pr_auc": 0.7612290843373175,
+      "confusion_matrix": {
+        "tn": 251,
+        "fp": 30,
+        "fn": 182,
+        "tp": 105
+      },
+      "false_positive_rate": 0.10676156583629894,
+      "false_negative_rate": 0.6341463414634146,
+      "evaluation_type": "dff_cross_generator",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.5905926916221034,
+          0.6628751295145056
+        ],
+        "roc_auc_95ci": [
+          0.7576196565598086,
+          0.83029216020384
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.9454225352112676,
+        "answered": 537,
+        "accuracy_on_answered": 0.6350093109869647
+      },
+      "per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.11373409628868103,
+          "real_acceptance_rate": 0.8932384341637011
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.382329523563385,
+          "fake_detection_rate": 0.36585365853658536
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.11373409628868103,
+        "mean_score_fake": 0.382329523563385
+      }
+    },
+    "cdf_test": {
+      "n": 2350,
+      "n_real": 1454,
+      "n_fake": 896,
+      "threshold": 0.5,
+      "accuracy": 0.9523404255319149,
+      "precision_fake": 0.9298245614035088,
+      "recall_fake": 0.9464285714285714,
+      "f1_fake": 0.9380530973451328,
+      "precision_real": 0.9666203059805285,
+      "recall_real": 0.9559834938101788,
+      "roc_auc": 0.9902182556740028,
+      "pr_auc": 0.9856714036060551,
+      "confusion_matrix": {
+        "tn": 1390,
+        "fp": 64,
+        "fn": 48,
+        "tp": 848
+      },
+      "false_positive_rate": 0.04401650618982118,
+      "false_negative_rate": 0.05357142857142857,
+      "evaluation_type": "celebdf_heldout_identities",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.9280290492957746,
+          0.9720409304002885
+        ],
+        "roc_auc_95ci": [
+          0.9799162780080982,
+          0.9964538001424338
+        ],
+        "n_groups": 17,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.9821276595744681,
+        "answered": 2308,
+        "accuracy_on_answered": 0.9584055459272097
+      },
+      "per_generator": {
+        "real": {
+          "n": 1454,
+          "mean_score": 0.05173901841044426,
+          "real_acceptance_rate": 0.9559834938101788
+        },
+        "celebdf_synthesis": {
+          "n": 896,
+          "mean_score": 0.9410442113876343,
+          "fake_detection_rate": 0.9464285714285714
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.05173901841044426,
+        "mean_score_fake": 0.9410442113876343
+      },
+      "video_level": {
+        "n": 147,
+        "n_real": 91,
+        "n_fake": 56,
+        "threshold": 0.5,
+        "accuracy": 0.9795918367346939,
+        "precision_fake": 0.9649122807017544,
+        "recall_fake": 0.9821428571428571,
+        "f1_fake": 0.9734513274336283,
+        "precision_real": 0.9888888888888889,
+        "recall_real": 0.978021978021978,
+        "roc_auc": 0.9990188383045526,
+        "pr_auc": 0.9984484568095342,
+        "confusion_matrix": {
+          "tn": 89,
+          "fp": 2,
+          "fn": 1,
+          "tp": 55
+        },
+        "false_positive_rate": 0.02197802197802198,
+        "false_negative_rate": 0.017857142857142856,
+        "aggregation": "median of the video's frame scores"
+      }
+    }
+  }
+}

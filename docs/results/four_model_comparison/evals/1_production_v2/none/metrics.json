@@ -1,0 +1,212 @@
+{
+  "checkpoint": "verifai_v2_best.pth",
+  "checkpoint_sha256": "3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7",
+  "model_name": "verifai-two-stream-v2_B_imagenetInit",
+  "device": "cuda",
+  "manifest": "manifests/analysis_manifest.csv",
+  "threshold": 0.5,
+  "splits": {
+    "test_internal": {
+      "n": 575,
+      "n_real": 292,
+      "n_fake": 283,
+      "threshold": 0.5,
+      "accuracy": 0.8747826086956522,
+      "precision_fake": 0.8600682593856656,
+      "recall_fake": 0.8904593639575972,
+      "f1_fake": 0.875,
+      "precision_real": 0.8900709219858156,
+      "recall_real": 0.8595890410958904,
+      "roc_auc": 0.9409700372718912,
+      "pr_auc": 0.9416074293440438,
+      "confusion_matrix": {
+        "tn": 251,
+        "fp": 41,
+        "fn": 31,
+        "tp": 252
+      },
+      "false_positive_rate": 0.1404109589041096,
+      "false_negative_rate": 0.10954063604240283,
+      "evaluation_type": "dff_internal_test",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.8478617103926372,
+          0.9020979020979021
+        ],
+        "roc_auc_95ci": [
+          0.9215855444657959,
+          0.9603376318150091
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.96,
+        "answered": 552,
+        "accuracy_on_answered": 0.8822463768115942
+      },
+      "per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.17038719356060028,
+          "real_acceptance_rate": 0.8595890410958904
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.8583393096923828,
+          "fake_detection_rate": 0.8661971830985915
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.9042722582817078,
+          "fake_detection_rate": 0.9148936170212766
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.17038719356060028,
+        "mean_score_fake": 0.8812246322631836
+      }
+    },
+    "test_crossgen": {
+      "n": 568,
+      "n_real": 281,
+      "n_fake": 287,
+      "threshold": 0.5,
+      "accuracy": 0.7464788732394366,
+      "precision_fake": 0.8177777777777778,
+      "recall_fake": 0.6411149825783972,
+      "f1_fake": 0.71875,
+      "precision_real": 0.6997084548104956,
+      "recall_real": 0.8540925266903915,
+      "roc_auc": 0.8492318375141047,
+      "pr_auc": 0.8414375551820963,
+      "confusion_matrix": {
+        "tn": 240,
+        "fp": 41,
+        "fn": 103,
+        "tp": 184
+      },
+      "false_positive_rate": 0.14590747330960854,
+      "false_negative_rate": 0.3588850174216028,
+      "evaluation_type": "dff_cross_generator",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.7151609717405166,
+          0.7817661178051942
+        ],
+        "roc_auc_95ci": [
+          0.819656699109293,
+          0.8796576900833858
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.9225352112676056,
+        "answered": 524,
+        "accuracy_on_answered": 0.7557251908396947
+      },
+      "per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.15906016528606415,
+          "real_acceptance_rate": 0.8540925266903915
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.6216014623641968,
+          "fake_detection_rate": 0.6411149825783972
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.15906016528606415,
+        "mean_score_fake": 0.6216014623641968
+      }
+    },
+    "cdf_test": {
+      "n": 2350,
+      "n_real": 1454,
+      "n_fake": 896,
+      "threshold": 0.5,
+      "accuracy": 0.4787234042553192,
+      "precision_fake": 0.37859778597785976,
+      "recall_fake": 0.5725446428571429,
+      "f1_fake": 0.45579742336739226,
+      "precision_real": 0.6150753768844222,
+      "recall_real": 0.42090784044016505,
+      "roc_auc": 0.47800249312242094,
+      "pr_auc": 0.353410787034952,
+      "confusion_matrix": {
+        "tn": 612,
+        "fp": 842,
+        "fn": 383,
+        "tp": 513
+      },
+      "false_positive_rate": 0.579092159559835,
+      "false_negative_rate": 0.42745535714285715,
+      "evaluation_type": "celebdf_heldout_identities",
+      "degradation": "none",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.3956066173399492,
+          0.5782277118006187
+        ],
+        "roc_auc_95ci": [
+          0.36977970084688183,
+          0.6057505988708866
+        ],
+        "n_groups": 17,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.8212765957446808,
+        "answered": 1930,
+        "accuracy_on_answered": 0.4740932642487047
+      },
+      "per_generator": {
+        "real": {
+          "n": 1454,
+          "mean_score": 0.5817045569419861,
+          "real_acceptance_rate": 0.42090784044016505
+        },
+        "celebdf_synthesis": {
+          "n": 896,
+          "mean_score": 0.5654548406600952,
+          "fake_detection_rate": 0.5725446428571429
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.5817045569419861,
+        "mean_score_fake": 0.5654548406600952
+      },
+      "video_level": {
+        "n": 147,
+        "n_real": 91,
+        "n_fake": 56,
+        "threshold": 0.5,
+        "accuracy": 0.48299319727891155,
+        "precision_fake": 0.3888888888888889,
+        "recall_fake": 0.625,
+        "f1_fake": 0.4794520547945205,
+        "precision_real": 0.631578947368421,
+        "recall_real": 0.3956043956043956,
+        "roc_auc": 0.46644427001569855,
+        "pr_auc": 0.34865746011760385,
+        "confusion_matrix": {
+          "tn": 36,
+          "fp": 55,
+          "fn": 21,
+          "tp": 35
+        },
+        "false_positive_rate": 0.6043956043956044,
+        "false_negative_rate": 0.375,
+        "aggregation": "median of the video's frame scores"
+      }
+    }
+  }
+}

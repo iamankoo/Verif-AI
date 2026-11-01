@@ -1,0 +1,212 @@
+{
+  "checkpoint": "cdf_C1_qa.pth",
+  "checkpoint_sha256": "e7e5f3dc28b252d43e2e9134e7f41185c49526cff5d1c03367d14ae3cf07eafb",
+  "model_name": "verifai-two-stream-v4_C1_celebdf_dff_qualityAug0.5",
+  "device": "cuda",
+  "manifest": "manifests/analysis_manifest.csv",
+  "threshold": 0.5,
+  "splits": {
+    "test_internal": {
+      "n": 575,
+      "n_real": 292,
+      "n_fake": 283,
+      "threshold": 0.5,
+      "accuracy": 0.7791304347826087,
+      "precision_fake": 0.7785714285714286,
+      "recall_fake": 0.7703180212014135,
+      "f1_fake": 0.7744227353463587,
+      "precision_real": 0.7796610169491526,
+      "recall_real": 0.7876712328767124,
+      "roc_auc": 0.8541071687884215,
+      "pr_auc": 0.8612029599651765,
+      "confusion_matrix": {
+        "tn": 230,
+        "fp": 62,
+        "fn": 65,
+        "tp": 218
+      },
+      "false_positive_rate": 0.21232876712328766,
+      "false_negative_rate": 0.22968197879858657,
+      "evaluation_type": "dff_internal_test",
+      "degradation": "phone_soft",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.7465050109260795,
+          0.8092820380145249
+        ],
+        "roc_auc_95ci": [
+          0.8236071705182049,
+          0.8799197263767563
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.8904347826086957,
+        "answered": 512,
+        "accuracy_on_answered": 0.80859375
+      },
+      "per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.25038763880729675,
+          "real_acceptance_rate": 0.7876712328767124
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.751507580280304,
+          "fake_detection_rate": 0.7887323943661971
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7478809952735901,
+          "fake_detection_rate": 0.75177304964539
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.25038763880729675,
+        "mean_score_fake": 0.749700665473938
+      }
+    },
+    "test_crossgen": {
+      "n": 568,
+      "n_real": 281,
+      "n_fake": 287,
+      "threshold": 0.5,
+      "accuracy": 0.6338028169014085,
+      "precision_fake": 0.7046632124352331,
+      "recall_fake": 0.4738675958188153,
+      "f1_fake": 0.5666666666666667,
+      "precision_real": 0.5973333333333334,
+      "recall_real": 0.797153024911032,
+      "roc_auc": 0.698314878420772,
+      "pr_auc": 0.6933480110788753,
+      "confusion_matrix": {
+        "tn": 224,
+        "fp": 57,
+        "fn": 151,
+        "tp": 136
+      },
+      "false_positive_rate": 0.20284697508896798,
+      "false_negative_rate": 0.5261324041811847,
+      "evaluation_type": "dff_cross_generator",
+      "degradation": "phone_soft",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.5983507853403142,
+          0.6702044737728511
+        ],
+        "roc_auc_95ci": [
+          0.6565182330783133,
+          0.7373883612324477
+        ],
+        "n_groups": 300,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.8873239436619719,
+        "answered": 504,
+        "accuracy_on_answered": 0.6527777777777778
+      },
+      "per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.22228145599365234,
+          "real_acceptance_rate": 0.797153024911032
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.47266459465026855,
+          "fake_detection_rate": 0.4738675958188153
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.22228145599365234,
+        "mean_score_fake": 0.47266459465026855
+      }
+    },
+    "cdf_test": {
+      "n": 2350,
+      "n_real": 1454,
+      "n_fake": 896,
+      "threshold": 0.5,
+      "accuracy": 0.9404255319148936,
+      "precision_fake": 0.9247191011235955,
+      "recall_fake": 0.9185267857142857,
+      "f1_fake": 0.921612541993281,
+      "precision_real": 0.95,
+      "recall_real": 0.953920220082531,
+      "roc_auc": 0.9861926459029279,
+      "pr_auc": 0.9803262200899993,
+      "confusion_matrix": {
+        "tn": 1387,
+        "fp": 67,
+        "fn": 73,
+        "tp": 823
+      },
+      "false_positive_rate": 0.04607977991746905,
+      "false_negative_rate": 0.08147321428571429,
+      "evaluation_type": "celebdf_heldout_identities",
+      "degradation": "phone_soft",
+      "bootstrap": {
+        "accuracy_95ci": [
+          0.91196058515999,
+          0.9650280504533082
+        ],
+        "roc_auc_95ci": [
+          0.9725333112270678,
+          0.9955130363256675
+        ],
+        "n_groups": 17,
+        "n_boot": 300
+      },
+      "abstention": {
+        "margin": 0.15,
+        "coverage": 0.9706382978723405,
+        "answered": 2281,
+        "accuracy_on_answered": 0.9513371328364753
+      },
+      "per_generator": {
+        "real": {
+          "n": 1454,
+          "mean_score": 0.05628199130296707,
+          "real_acceptance_rate": 0.953920220082531
+        },
+        "celebdf_synthesis": {
+          "n": 896,
+          "mean_score": 0.9086618423461914,
+          "fake_detection_rate": 0.9185267857142857
+        }
+      },
+      "score_stats": {
+        "mean_score_real": 0.05628199130296707,
+        "mean_score_fake": 0.9086618423461914
+      },
+      "video_level": {
+        "n": 147,
+        "n_real": 91,
+        "n_fake": 56,
+        "threshold": 0.5,
+        "accuracy": 0.9863945578231292,
+        "precision_fake": 0.9821428571428571,
+        "recall_fake": 0.9821428571428571,
+        "f1_fake": 0.9821428571428571,
+        "precision_real": 0.989010989010989,
+        "recall_real": 0.989010989010989,
+        "roc_auc": 0.9990188383045526,
+        "pr_auc": 0.9984484568095343,
+        "confusion_matrix": {
+          "tn": 90,
+          "fp": 1,
+          "fn": 1,
+          "tp": 55
+        },
+        "false_positive_rate": 0.01098901098901099,
+        "false_negative_rate": 0.017857142857142856,
+        "aggregation": "median of the video's frame scores"
+      }
+    }
+  }
+}
