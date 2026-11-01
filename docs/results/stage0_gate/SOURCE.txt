@@ -1,0 +1,3 @@
+cdf_gate.json: output of Kaggle notebook iamankoo/verif-ai-stage0 (private; GPU; inference only; protocol docs/STAGE0_PROTOCOL.md v1, frozen).
+Celeb-DF v2 VALIDATION identities only (clean and class-blind "mixed" degradation); no test identity was read; no training; threshold 0.5.
+Downloaded: only verifai_stage0_results.zip (one JSON, 36 KB). It contains no Celeb-DF frames/crops and no personal media. Crops were written to /tmp inside the notebook.
