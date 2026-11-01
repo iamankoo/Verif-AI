@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "../api";
+import { IconImage, IconVideo } from "../components/Icons";
 import { ErrorBanner, HistoryList, ModelCard, ProgressPanel } from "../components/Panels";
 import { UploadZone } from "../components/UploadZone";
 import { fmtBytes, type Kind } from "../lib/format";
@@ -16,6 +17,7 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [history, setHistory] = useState<AnalysisSummary[]>([]);
   const [sel, setSel] = useState<Selected | null>(null);
+  const [mode, setMode] = useState<Kind>("image");
   const [busy, setBusy] = useState<{ phase: "uploading" | "analysing"; progress: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +35,7 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
 
   const choose = useCallback((file: File, kind: Kind) => {
     setError(null);
+    setMode(kind);                                   // a file of the other kind switches the visible tab
     setSel({ file, kind, url: URL.createObjectURL(file) });
   }, []);
 
@@ -56,32 +59,50 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
   };
 
   const modelReady = health ? health.model_loaded : true;
+  const switchTab = (k: Kind) => {
+    setMode(k);
+    if (sel && sel.kind !== k) setSel(null);          // a preview of the other kind is dropped when the tab changes
+  };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5">
-      <div className="space-y-5 lg:col-span-3">
-        <section className="card p-6">
-          <h1 className="text-3xl">See beyond the pixels.</h1>
-          <p className="mt-2 max-w-2xl text-ink-soft">
-            Upload a photo or video of a person. Verif-AI detects faces, analyses them with a two-stream deep-learning model, highlights the evidence and produces a forensic report. It runs entirely on this server - nothing is sent to third-party AI services.
-          </p>
-        </section>
+    <div className="space-y-10 pb-4">
+      <section className="mx-auto max-w-3xl text-center">
+        <h1 className="text-3xl font-bold leading-tight sm:text-4xl">See Beyond the Pixels. Verify What&apos;s Real.</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-ink-soft">
+          Upload a photo or video of a person. Verif-AI finds the faces, scores them with a two-stream deep-learning model, shows the evidence and gives you a PDF report. Everything runs on this computer.
+        </p>
+      </section>
 
-        {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
-
-        {busy ? (
-          <ProgressPanel
-            stage={busy.phase}
-            progress={busy.phase === "uploading" ? busy.progress : 1}
-            label={busy.phase === "uploading" ? `Uploading ${sel?.file.name}` : "Analysing - this can take a while for videos..."}
-          />
-        ) : (
-          <>
-            <UploadZone limits={info?.limits} disabled={!modelReady} onSelect={choose} onError={setError} />
-            {sel && (
-              <section className="card p-5" data-testid="preview">
+      <section className="mx-auto w-full max-w-3xl" aria-label="Upload">
+        {error && <div className="mb-4"><ErrorBanner message={error} onClose={() => setError(null)} /></div>}
+        <div className="card p-4 sm:p-6">
+          <div role="tablist" aria-label="Media type" className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-paper-line bg-paper-raised p-1">
+            {([["image", "Upload Image", IconImage], ["video", "Upload Video", IconVideo]] as const).map(([k, label, Icon]) => (
+              <button
+                key={k}
+                role="tab"
+                id={`tab-${k}`}
+                aria-selected={mode === k}
+                aria-controls="upload-panel"
+                disabled={!!busy}
+                onClick={() => switchTab(k)}
+                className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition ${mode === k ? "bg-white text-accent shadow-sm" : "text-ink-mute hover:text-ink"}`}
+              >
+                <Icon className="h-4 w-4" /> {label}
+              </button>
+            ))}
+          </div>
+          <div id="upload-panel" role="tabpanel" aria-labelledby={`tab-${mode}`}>
+            {busy ? (
+              <ProgressPanel
+                stage={busy.phase}
+                progress={busy.phase === "uploading" ? busy.progress : 1}
+                label={busy.phase === "uploading" ? `Uploading ${sel?.file.name}` : "Analysing - this can take a while for videos..."}
+              />
+            ) : sel ? (
+              <section data-testid="preview">
                 <div className="flex flex-wrap items-start gap-5">
-                  <div className="w-full max-w-xs overflow-hidden rounded-lg bg-paper">
+                  <div className="w-full max-w-xs overflow-hidden rounded-xl bg-paper">
                     {sel.kind === "image" ? (
                       <img src={sel.url} alt="Selected file preview" className="max-h-64 w-full object-contain" />
                     ) : (
@@ -89,9 +110,9 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="break-all font-medium">{sel.file.name}</p>
+                    <p className="break-all font-semibold">{sel.file.name}</p>
                     <p className="text-sm text-ink-mute">{sel.kind} &middot; {fmtBytes(sel.file.size)}</p>
-                    <div className="mt-4 flex gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <button className="btn-primary" onClick={analyse} disabled={!modelReady}>Analyse {sel.kind}</button>
                       <button className="btn-secondary" onClick={() => setSel(null)}>Remove</button>
                     </div>
@@ -99,15 +120,17 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
                   </div>
                 </div>
               </section>
+            ) : (
+              <UploadZone limits={info?.limits} mode={mode} disabled={!modelReady} onSelect={choose} onError={setError} />
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </section>
 
-      <aside className="space-y-5 lg:col-span-2">
+      <section className="grid gap-5 lg:grid-cols-2" aria-label="Model and history">
         <ModelCard info={info} health={health} />
         <HistoryList items={history} onOpen={onOpen} />
-      </aside>
+      </section>
     </div>
   );
 }

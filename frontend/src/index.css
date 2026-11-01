@@ -1,5 +1,4 @@
 @import "@fontsource-variable/inter";
-@import "@fontsource/source-serif-4/600.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,13 +6,17 @@
 @layer base {
   html { @apply bg-paper text-ink antialiased; }
   body { @apply font-sans min-h-screen; }
-  h1, h2, h3 { @apply font-serif; }
+  h1, h2, h3 { @apply font-sans font-semibold tracking-tight; }
   :focus-visible { @apply outline outline-2 outline-offset-2 outline-accent; }
 }
 
 @layer components {
   .card { @apply rounded-xl border border-paper-line bg-paper-card shadow-sm; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn bg-ink text-white hover:bg-ink-soft; }
-  .btn-secondary { @apply btn border border-paper-line bg-white text-ink hover:bg-paper; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-accent text-white hover:bg-accent-dark; }
+  .btn-secondary { @apply btn border border-paper-line bg-white text-ink hover:bg-paper-raised; }
+  .btn-danger { @apply btn border border-fake/30 bg-white text-fake hover:bg-fake-soft; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-md border border-paper-line bg-paper-raised px-2.5 py-1 text-xs text-ink-soft; }
+  .nav-link { @apply inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-paper-raised hover:text-ink; }
+  .nav-link[aria-current="page"] { @apply bg-accent-soft text-accent; }
 }
