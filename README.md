@@ -40,6 +40,7 @@ Known limitations (not exhaustive):
 - Trained on ~3.9 k face crops from one dataset (IMDB-WIKI real photos; inpainting/insight/text2img fakes). Behaviour on face-swap deepfakes, other generators, heavy compression or other populations is **unmeasured**.
 - Cross-generator FNR is ~36 %: unseen generators are missed often.
 - **No labelled video dataset was available** (Celeb-DF, FF++, DFDC require signed agreements), so **video-level accuracy has not been measured** and the video aggregation rule is unvalidated. In the end-to-end test a slideshow of four *real* photographs was scored FAKE at video level, consistent with a ~14–17 % per-frame false-positive rate compounding across tracks.
+- A 6-second zoom clip made from one real photograph (resampled and re-encoded) was also scored FAKE, while the original still is REAL: expect false positives on re-compressed or resampled media.
 - The Grad-CAM view explains the RGB stream only and is not proof that pixels were altered.
 
 ## Quick start
@@ -57,7 +58,7 @@ VERIFAI_FRONTEND_DIR=../frontend/dist uvicorn verifai.api.app:app --port 8000
 cd ../frontend && npm ci && npm run build
 # or, for development with hot reload:  npm run dev   (proxy to :8000)
 ```
-Docker: see [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md). Usage: [docs/USER_GUIDE.md](docs/USER_GUIDE.md). API: [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).
+Docker (`docker build -t verifai . && docker run -p 8000:8000 -v verifai-data:/app/storage verifai`; build and runtime verified in GitHub Codespaces): see [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md). Usage: [docs/USER_GUIDE.md](docs/USER_GUIDE.md). API: [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).
 
 ## Tests
 ```bash

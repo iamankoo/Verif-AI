@@ -14,11 +14,11 @@ Status of the delivery plan. "Done" means the listed verification was actually e
 | 8 | React frontend (real endpoints only) | Done | `frontend/`, 36 tests, screenshots |
 | 9 | Test suites and real-server smoke test | Done | see completion report for counts |
 | 10 | Model evaluation report | Done | `docs/MODEL_EVALUATION_REPORT.md` |
-| 11 | Performance and deployment (Docker) | See completion report for the Docker verification status | `Dockerfile`, `docs/INSTALLATION_GUIDE.md` |
+| 11 | Performance and deployment (Docker) | Done — image built and container verified in GitHub Codespaces | `Dockerfile`, `docs/INSTALLATION_GUIDE.md` |
 | 12 | Documentation | Done | `README.md`, `docs/` |
 | 13 | Cleanup and secret scan | Done | `.gitignore`, completion report |
-| 14 | Final verification | See completion report | completion report |
-| 15 | GitHub delivery | See completion report for commit hashes | completion report |
+| 14 | Final verification | Done | completion report |
+| 15 | GitHub delivery | Done — pushed to `main` and verified on GitHub | completion report |
 
 ## Not done / out of scope
 - Validation on face-swap video benchmarks (Celeb-DF, FaceForensics++, DFDC): restricted datasets, not obtainable without agreements.

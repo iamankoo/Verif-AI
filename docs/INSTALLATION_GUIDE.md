@@ -54,7 +54,9 @@ cd ../backend && set VERIFAI_FRONTEND_DIR=../frontend/dist && uvicorn verifai.ap
 docker build -t verifai .
 docker run --rm -p 8000:8000 -v verifai-data:/app/storage verifai       # http://localhost:8000
 ```
-The image bundles the built UI and the checkpoints from `backend/models` and `backend/scripts`. *The Dockerfile was written and reviewed but could not be built in the delivery environment (Docker daemon not running); see the completion report for the later Codespaces verification.*
+The image bundles the built UI and the checkpoints from `backend/models` and `backend/scripts`.
+
+**Verified (2026-11-01, GitHub Codespaces, Docker 29.9.2, 4 vCPU / 16 GB, commit `98e6c82`):** `docker build -t verifai .` succeeded in 4 min 21 s (image 2.44 GB); the container became *healthy* with 0 restarts and runs as the non-root user `verifai`; `/api/health` reported `model_loaded: true` (CPU), `/api/model` reported checkpoint SHA-256 `3b947755…`, `/` served the UI (HTTP 200, also screenshotted through a forwarded port: `docs/screenshots/docker-desktop-0*.png`); a real image analysis, a video job (13 sampled frames, 2 tracks) and both PDF reports worked; a `.py` upload returned 415; `DELETE` returned 204 then 404; no errors in the container log. The Docker run is a functional check on a public-domain photograph and a synthetic video made from it, not an accuracy measurement. Not tested: GPU images, other CPU architectures, a registry push, running behind a reverse proxy.
 
 ## 6. Verify the installation
 ```bash

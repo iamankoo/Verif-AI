@@ -50,3 +50,22 @@ Chronological record of the delivery work (dates are the machine's local date, 2
 ## Clean-environment installation (Phase 14 evidence)
 `python -m venv backend/.venv && pip install -r requirements-dev.txt` → exit 0; `pip check`: *No broken requirements found*; resolved versions in `backend/requirements.lock.txt` (torch 2.14.1, torchvision 0.29.2, facenet-pytorch 2.5.3, grad-cam 1.5.7, fastapi 0.162.0, numpy 2.2.6, opencv-python-headless 5.0.0.93, reportlab 5.1.0).
 Backend test suite in that environment: **100 passed, 6 skipped** (5 need private media, 1 needs CUDA) at the first complete run; later runs are listed below.
+
+## Phase 9-10 - Final local verification (2026-11-01, on the final model)
+- Backend `pytest tests` → **108 passed, 6 skipped** (5 need the owner's private reference media, 1 needs CUDA); frontend `tsc --noEmit` clean, `npm test` **36 passed**, `npm run build` OK; Kaggle-bundle tests (run from inside the bundle) **39 passed, 1 skipped (CUDA)**; `tools/e2e_smoke.py` against a real server and the final checkpoint **28/28** (`docs/results/e2e_smoke_report.json`).
+
+## Phase 11 - Docker in GitHub Codespaces (2026-11-01)
+The local Docker daemon was not running, so verification used a Codespace (4 vCPU / 16 GB, Docker 29.9.2) created from the pushed commit `98e6c82` and deleted afterwards.
+1. `docker build -t verifai .` → success, 4 min 21 s, image 2.44 GB.
+2. `docker run -d -p 8000:8000 -v verifai-data:/app/storage verifai` → healthcheck *healthy* after ≈ 15 s; 0 restarts; user `verifai` (non-root).
+3. `/api/health` → `model_loaded: true`, CPU; `/api/model` → v2 checkpoint, SHA-256 `3b947755…`; `/` → UI HTTP 200.
+4. Image upload (public-domain astronaut photo) → REAL, 1 face, fake-probability 1.7e-5; PDF 123 KB (`%PDF`).
+5. Video (6 s, 60 frames, zoom clip generated inside the container from the same photograph) → job completed, 13 sampled frames, 13 with faces, 2 tracks, classification **FAKE (0.85)**; PDF 500 KB. Recorded as a false positive caused by resampling/re-encoding (see evaluation report §6).
+6. `.py` upload → 415; `DELETE` → 204, then `GET` → 404; container log had no errors.
+7. UI screenshots through a forwarded port: `docs/screenshots/docker-desktop-0*.png`.
+Not covered in Docker: `tools/e2e_smoke.py` (needs the dataset crops, which are intentionally not in the repository) - it was run locally instead.
+
+## Phase 13-15 - Cleanup, secret scan, GitHub delivery
+- Removed: empty `backend/scripts/pipeline.py`; `deepfake_banner.svg` (repeated unsupported claims; backup kept outside the repo). Git-ignored/not published: `image6.3.png`, private reference media and its report, local data/runs, epoch 1-9 checkpoints, `kaggle/dist`, `kaggle/out`, env files, virtualenvs.
+- Secret scan of every staged text file (token/key/password patterns, private-key headers, personal paths, private media names) → nothing found except documentation that *mentions* the never-read `aau_token` file (the file itself is git-ignored and was never read) and, before it was excluded, the private reference-media report. `kaggle.json` was never opened or printed and is outside the repository.
+- Pushed to `origin/main` with the owner's own `gh` session (no force). Commits: `1471e1b`, `129c556`, `eb86f29`, `eed9056`, `98e6c82` (author Aniket Raj, no attribution trailers), verified with `git ls-remote` and the GitHub API.
