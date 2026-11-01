@@ -1,0 +1,19 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource/source-serif-4/600.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply bg-paper text-ink antialiased; }
+  body { @apply font-sans min-h-screen; }
+  h1, h2, h3 { @apply font-serif; }
+  :focus-visible { @apply outline outline-2 outline-offset-2 outline-accent; }
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-paper-line bg-paper-card shadow-sm; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-ink text-white hover:bg-ink-soft; }
+  .btn-secondary { @apply btn border border-paper-line bg-white text-ink hover:bg-paper; }
+}
