@@ -222,7 +222,7 @@ Before you start: backend running, browser open at `http://127.0.0.1:8000`, demo
 ---
 ## Part 9. Before the presentation — checklist
 - [ ] Laptop charged; Python venv and `frontend\dist` built **in advance** (never install in front of the examiner); start command tested from a *new* PowerShell window the day before.
-- [ ] `Test-Path backend\models\verifai_v2_best.pth` is True; `/api/health` says `model_loaded: true`.
+- [ ] `Test-Path backend\models\verifai_v3_celebdf_qa.pth` is True (current default, Model 4 - read [CURRENT_DEFAULT_MODEL.md](CURRENT_DEFAULT_MODEL.md) so you can answer questions about its weaknesses honestly); `Test-Path backend\models\verifai_v2_best.pth` is True (rollback); `/api/health` says `model_loaded: true` and `/api/model` shows the expected checkpoint.
 - [ ] Demo folder prepared **and pre-tested** (≥ 2 real images, ≥ 2 fake images including one you know the model gets right, one low-res, one no-face, one `.txt`); a genuine-face video of yourself; a manipulated video only if legitimately available; spare copies on a USB drive.
 - [ ] A PDF downloaded beforehand as a backup; screenshots in `docs/screenshots/`; plots in `docs/figures/v2_selected/`.
 - [ ] Browser zoom ~110 %; close other heavy programs; one video at a time.

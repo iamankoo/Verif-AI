@@ -1,0 +1,13 @@
+{
+  "file": "models/verifai_v3_celebdf_qa.pth",
+  "sha256": "e7e5f3dc28b252d43e2e9134e7f41185c49526cff5d1c03367d14ae3cf07eafb",
+  "status": "temporary default (owner decision 2026-11-01); experimental, not validated for general use",
+  "selected_run": "v4_C1_celebdf_dff_qualityAug0.5",
+  "selection_criterion": "clean_degraded_mean validation ROC-AUC (pre-declared rule, Celeb-DF candidates)",
+  "best_epoch": 12,
+  "trained_on": "DeepFakeFace sample + Celeb-DF v2 crops (41 training identities), quality augmentation; identity-disjoint splits",
+  "threshold": 0.5,
+  "rollback": "VERIFAI_MODEL_PATH=models/verifai_v2_best.pth",
+  "limitations": "Weaker than v2 on AI-edited and text-to-image faces (see docs/CURRENT_DEFAULT_MODEL.md). Scores are uncalibrated. Celeb-DF video accuracy is within-dataset only.",
+  "checkpoint_unmodified": true
+}

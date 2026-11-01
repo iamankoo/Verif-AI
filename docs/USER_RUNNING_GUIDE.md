@@ -65,11 +65,14 @@ Copy-Item backend\.env.example backend\.env
 `backend\.env` is git-ignored. Do not put secrets in it – the project has none.
 
 ### 8. Check that the model checkpoint exists
+**Current default: Model 4** (`verifai_v3_celebdf_qa.pth`, temporary - see [CURRENT_DEFAULT_MODEL.md](CURRENT_DEFAULT_MODEL.md)). Production v2 is kept unchanged as the rollback.
 ```powershell
+Test-Path backend\models\verifai_v3_celebdf_qa.pth
+(Get-FileHash backend\models\verifai_v3_celebdf_qa.pth -Algorithm SHA256).Hash   # starts E7E5F3DC28B2...
 Test-Path backend\models\verifai_v2_best.pth
 (Get-FileHash backend\models\verifai_v2_best.pth -Algorithm SHA256).Hash
 ```
-Expected: `True` and `3B94775581931210A51BFBB7C3DA301F...` — the full SHA-256 is `3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7` (case does not matter). The file is about 48 MB. If it is missing the server falls back to the original prototype checkpoint `backend\scripts\two_stream_model_epoch_10.pth` (which is **at chance level** – do not demonstrate with it).
+Expected: `True` for both; v2's full SHA-256 is `3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7` (case does not matter). Each file is about 48 MB. Model 4 is not stored in the repository; without it the server falls back to v2. To use v2: `VERIFAI_MODEL_PATH=models/verifai_v2_best.pth` in `backend\.env`. If it is missing the server falls back to the original prototype checkpoint `backend\scripts\two_stream_model_epoch_10.pth` (which is **at chance level** – do not demonstrate with it).
 
 ### 9–10. Start the application
 There are two ways. **Use mode 1 for the examiner demonstration** (one terminal, one URL).

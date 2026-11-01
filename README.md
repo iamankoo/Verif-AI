@@ -25,6 +25,9 @@ image / video ─► decode ─► MTCNN face crop (224, margin 20) ─► JPEG 
 ```
 11,972,954 parameters; decision threshold fixed at 0.5. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## Current default model (temporary)
+The server currently loads **Model 4** (`backend/models/verifai_v3_celebdf_qa.pth`: DeepFakeFace + Celeb-DF, with quality augmentation) by default, as an owner decision while more data is tested. It handles genuine camera video far better than v2 but is **weaker at detecting some AI-generated images**; the measured trade-offs and the rollback (`VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`) are in [docs/CURRENT_DEFAULT_MODEL.md](docs/CURRENT_DEFAULT_MODEL.md). The sections below describe the production model v2.
+
 ## Results and limitations
 Selected model: **`verifai_v2_best.pth`** — a two-stream network initialised from ImageNet and trained on the DeepFakeFace sample on a Kaggle Tesla T4. Chosen among three trained configurations **by validation ROC-AUC only**; the test splits were never used for selection. Threshold 0.5. Frame-level metrics on identity-disjoint splits (95 % bootstrap CIs in the full report):
 

@@ -50,12 +50,16 @@ Other URLs: health check http://127.0.0.1:8000/api/health · API documentation h
 3. Read the verdict, frame timeline, suspicious timestamps, face tracks and highest-scoring frames; download the PDF.
 
 ## E. Check that the model file is there
+**Current default: Model 4** (`backend\models\verifai_v3_celebdf_qa.pth`, a temporary owner decision - see [CURRENT_DEFAULT_MODEL.md](CURRENT_DEFAULT_MODEL.md) for its measured strengths *and* weaknesses). This file is not in the repository; it is copied locally. If it is missing the server falls back to v2.
 ```powershell
 cd Verif-AI
-Test-Path backend\models\verifai_v2_best.pth        # should print True
+Test-Path backend\models\verifai_v3_celebdf_qa.pth        # should print True
+(Get-FileHash backend\models\verifai_v3_celebdf_qa.pth -Algorithm SHA256).Hash   # should start E7E5F3DC28B2...
+Test-Path backend\models\verifai_v2_best.pth              # production v2 (rollback), unchanged
 (Get-FileHash backend\models\verifai_v2_best.pth -Algorithm SHA256).Hash   # should end ...a370d7 (3B94775581931210...)
 ```
-Full expected hash: `3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7` (case-insensitive).
+Full expected hashes: Model 4 `e7e5f3dc28b252d43e2e9134e7f41185c49526cff5d1c03367d14ae3c...` (confirm with `/api/model`), v2 `3b94775581931210a51bfbb7c3da301ff1d3f38e658fee0ba7649b23fca370d7`.
+To switch back to v2: set `VERIFAI_MODEL_PATH=models/verifai_v2_best.pth` in `backend\.env` and restart.
 
 ## F. If something fails
 | Symptom | Quick fix |

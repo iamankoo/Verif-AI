@@ -33,7 +33,10 @@ def _b(v: str) -> bool:
 
 
 def default_model_path() -> Path:
-    for cand in (BACKEND_DIR / "models" / "verifai_v2_best.pth",
+    # Temporary default (owner decision, 2026-11-01): Model 4 (DFF + Celeb-DF + quality augmentation), see docs/CURRENT_DEFAULT_MODEL.md.
+    # The file is not in the repository; if it is absent the server falls back to production v2, then to the original prototype.
+    for cand in (BACKEND_DIR / "models" / "verifai_v3_celebdf_qa.pth",
+                 BACKEND_DIR / "models" / "verifai_v2_best.pth",
                  BACKEND_DIR / "scripts" / "two_stream_model_epoch_10.pth"):
         if cand.is_file():
             return cand
