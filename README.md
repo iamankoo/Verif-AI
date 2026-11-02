@@ -28,6 +28,15 @@ image / video ─► decode ─► MTCNN face crop (224, margin 20) ─► JPEG 
 ## Current default model (temporary)
 The server currently loads **Model 4** (`backend/models/verifai_v3_celebdf_qa.pth`: DeepFakeFace + Celeb-DF, with quality augmentation) by default, as an owner decision while more data is tested. It handles genuine camera video far better than v2 but is **weaker at detecting some AI-generated images**; the measured trade-offs and the rollback (`VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`) are in [docs/CURRENT_DEFAULT_MODEL.md](docs/CURRENT_DEFAULT_MODEL.md). The sections below describe the production model v2.
 
+### Model registry: production default, rollback, candidate
+| Role | Model | File (not all in Git) | How it is used |
+|---|---|---|---|
+| **Production default** | Model 4 | `backend/models/verifai_v3_celebdf_qa.pth` (local / host disk only) | used whenever a request names no model (`VERIFAI_MODEL_PATH`) |
+| **Rollback** | v2 | `backend/models/verifai_v2_best.pth` (in Git) | `VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`, or select it per analysis |
+| **Candidate (not approved)** | E4 | `backend/models/verifai_e4_candidate.pth` (local only; SHA-256 `0d553de9...f9cba0`) | selectable for evaluation only; results are labelled *Candidate - not approved for production* |
+
+E4 completed training and was evaluated, but it **failed the frozen promotion rule** (criterion 2: DeepFakeFace missed-fake rate 0.208 internal vs. limit 0.160; 0.509 cross-generator vs. limit 0.409), so it is a candidate only. Results: [docs/E4_RESULTS.md](docs/E4_RESULTS.md); registry, selection API and hosting limits: [docs/E4_INTEGRATION.md](docs/E4_INTEGRATION.md). Use it locally: put the checkpoint in `backend/models/`, start the server and pick the model in the upload card (or send form field `model=e4`). Hosted instances expose only the model they serve (`VERIFAI_ENABLE_MODEL_SELECTION=false`).
+
 ## Live deployment
 | Part | Where | Notes |
 |---|---|---|
@@ -36,7 +45,7 @@ The server currently loads **Model 4** (`backend/models/verifai_v3_celebdf_qa.pt
 The free Render instance has 512 MB RAM, so it runs in **lite mode**: the repository's production model v2 (Model 4 is not in Git), **Grad-CAM heat-maps switched off** (the UI says so instead of showing nothing), small batches, short uploads, no persistent disk (results disappear on restart) and a cold start of about a minute after idle. Full functionality (Model 4, heat-maps, durable results) needs a plan with at least 2 GB RAM and a disk, or running the app locally; the measured numbers, setup steps and checklist are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Do not upload personal media to the public demo.
 
 ## Research status
-Experiments E1-E4 (quality-shortcut diagnosis, stage-0 gate, modern-generator training) are documented in `docs/` (`E1_QUALITY_BIN_DIAGNOSTIC.md`, `STAGE0_GATE_VALIDATION.md`, `FOUR_MODEL_COMPARISON.md`, `E3_PROTOCOL.md`, `E3_RESULTS.md`, `E4_PROTOCOL_ADDENDUM.md`) with the dataset review in [docs/DATASET_LICENCE_REVIEW.md](docs/DATASET_LICENCE_REVIEW.md). Short version: no model has met the pre-registered promotion rule; the E3 models detect held-out modern fakes (not generator-disjoint) but not better than Model 4 on DeepFakeFace; nothing supports a claim of general AI-image or AI-video detection.
+Experiments E1-E4 (quality-shortcut diagnosis, stage-0 gate, modern-generator training) are documented in `docs/` (`E1_QUALITY_BIN_DIAGNOSTIC.md`, `STAGE0_GATE_VALIDATION.md`, `FOUR_MODEL_COMPARISON.md`, `E3_PROTOCOL.md`, `E3_RESULTS.md`, `E4_PROTOCOL_ADDENDUM.md`, `E4_RESULTS.md`, `E4_INTEGRATION.md`) with the dataset review in [docs/DATASET_LICENCE_REVIEW.md](docs/DATASET_LICENCE_REVIEW.md). Short version: no model has met the pre-registered promotion rule (E3A and the completed E4 both failed criterion 2 - see [docs/E4_RESULTS.md](docs/E4_RESULTS.md)); the E3 models detect held-out modern fakes (not generator-disjoint) but not better than Model 4 on DeepFakeFace; nothing supports a claim of general AI-image or AI-video detection.
 
 ## Results and limitations
 Selected model: **`verifai_v2_best.pth`** — a two-stream network initialised from ImageNet and trained on the DeepFakeFace sample on a Kaggle Tesla T4. Chosen among three trained configurations **by validation ROC-AUC only**; the test splits were never used for selection. Threshold 0.5. Frame-level metrics on identity-disjoint splits (95 % bootstrap CIs in the full report):

@@ -1,0 +1,7 @@
+{
+  "best_epoch": 12,
+  "best_val_auc": 0.9797335369132283,
+  "selection_criterion": "clean_degraded_mean",
+  "epochs_run": 12,
+  "minutes": 134.46305965185167
+}

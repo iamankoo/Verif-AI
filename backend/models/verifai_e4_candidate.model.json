@@ -1,0 +1,16 @@
+{
+  "file": "models/verifai_e4_candidate.pth",
+  "sha256": "0d553de918c120994e0919386d7afb6378cd489cc9ef4abc2aa4850e5cf9cba0",
+  "status": "CANDIDATE - not approved for production (failed frozen promotion criterion 2); selectable for evaluation only",
+  "selected_run": "e4a_dffx4_modern_qa0.5",
+  "selection_criterion": "clean_degraded_mean validation ROC-AUC (pre-declared rule)",
+  "best_epoch": 12,
+  "epochs_run": 12,
+  "validation_selection_score": 0.9797,
+  "trained_on": "DeepFakeFace sample (rows repeated x4) + Celeb-DF v2 crops (41 training identities) + FFHQ / SFHQ / DeepDetect-2025 fakes, quality augmentation; file-/identity-disjoint splits",
+  "threshold": 0.5,
+  "results": "docs/E4_RESULTS.md",
+  "limitations": "Weaker than v2 on DeepFakeFace (internal missed-fake rate 0.208, cross-generator 0.509). modern_test is not generator-disjoint; Celeb-DF is within-dataset. Scores are uncalibrated.",
+  "not_in_git": true,
+  "checkpoint_unmodified": true
+}

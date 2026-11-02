@@ -21,6 +21,10 @@ services:
         value: /data/storage
       - key: VERIFAI_DEVICE
         value: cpu
+      # Only the default model is offered on a hosted instance. To let reviewers try the E4 CANDIDATE (never the default), copy
+      # verifai_e4_candidate.pth to /data/models/, set VERIFAI_CANDIDATE_MODEL_PATH to it and this value to true (needs the 2 GB plan: two models in memory).
+      - key: VERIFAI_ENABLE_MODEL_SELECTION
+        value: "false"
       # Public deployment: do not let visitors list each other's analyses (each browser keeps its own history).
       - key: VERIFAI_PUBLIC_HISTORY
         value: "false"

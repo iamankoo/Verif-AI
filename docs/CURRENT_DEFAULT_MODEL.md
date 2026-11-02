@@ -45,3 +45,7 @@ Earlier, on held-out Celeb-DF video identities (`docs/FOUR_MODEL_COMPARISON.md`)
 * Model 4's SRM (noise-residual) stream scores unseen text-to-image fakes very low (mean 0.11 versus 0.82 for v2) and its RGB stream is weaker too (0.43 versus 0.60), so the fused score is lower (stream scores measured by neutralising the other stream with mean DFF-train features, on the same text-to-image sample; they are conditional scores, not independent classifiers). `docs/STAGE0_GATE_VALIDATION.md` documents the related stream-collapse behaviour on Celeb-DF.
 * The score is **not a calibrated probability**. A score of 0.000 or 1.000 does not mean certainty; the interface labels it "model score, 0-1" and never shows it as a percentage. A REAL verdict is never proof of authenticity.
 * Do not claim a general accuracy figure for the system; only the numbers above, on the stated data, are supported.
+
+## Registry, rollback and the E4 candidate (added after E4 completed)
+* The default is unchanged: **Model 4**. v2 remains the rollback. **E4 is a selectable candidate only** - it failed the frozen promotion rule (criterion 2). See [E4_RESULTS.md](E4_RESULTS.md).
+* `GET /api/models` lists the registered models and their roles; the upload card offers rollback/candidate models on instances where `VERIFAI_ENABLE_MODEL_SELECTION=true` (the local default). Choosing a candidate never changes the default and every result says which model produced it. See [E4_INTEGRATION.md](E4_INTEGRATION.md).

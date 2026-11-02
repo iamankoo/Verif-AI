@@ -23,6 +23,9 @@ The frontend is static, so it can live on Vercel. The backend cannot: it needs P
 
 No secret is required by the application. Nothing in the repository is a credential; do not commit `.env` files.
 
+## Model selection on hosted instances
+`VERIFAI_ENABLE_MODEL_SELECTION=false` (set in the `Dockerfile` and `render.yaml`) makes the hosted API offer only the model it serves. Model 4 and the E4 candidate are not in Git and the free instance has no disk, so the free-tier demonstration serves **v2** and cannot host E4. To offer E4 as a *candidate* on a paid instance: copy `verifai_e4_candidate.pth` to `/data/models/`, set `VERIFAI_CANDIDATE_MODEL_PATH=/data/models/verifai_e4_candidate.pth` and `VERIFAI_ENABLE_MODEL_SELECTION=true` (needs >= 2 GB RAM: two models plus Grad-CAM). Details and the rollback procedure: [E4_INTEGRATION.md](E4_INTEGRATION.md).
+
 ## Resource and hosting requirements (measured)
 * Memory: about 490 MB after the model loads, about 780 MB peak per image analysis (Grad-CAM included), over 820 MB while a video is analysed. Use a plan with at least 2 GB; 512 MB plans will be killed.
 * A persistent disk (paid instances only) is required: the instance filesystem is ephemeral and is wiped on every deploy and restart.

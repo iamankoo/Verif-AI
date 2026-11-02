@@ -2,6 +2,21 @@
 
 All notable changes to Verif-AI. Dates are ISO. Phase numbering follows the approved plan.
 
+## [2.1.0] — 2026-11-02 — E4 results and model registry
+
+### Added
+- **Experiment E4 completed and recorded** (`docs/E4_RESULTS.md`, `docs/results/e4_modern/`): not promoted - fails frozen criterion 2 (DeepFakeFace missed-fake rate 0.208 / 0.509 against limits 0.160 / 0.409). Model 4 stays the default; v2 the rollback.
+- **Model registry** (`backend/verifai/registry.py`): production default / rollback / candidate roles, `GET /api/models`, optional `model` form field on the analysis endpoints, lazy loading of at most one optional model, `VERIFAI_ROLLBACK_MODEL_PATH`, `VERIFAI_CANDIDATE_MODEL_PATH`, `VERIFAI_ENABLE_MODEL_SELECTION`.
+- Dashboard: model picker (only where the server offers choices), candidate warning, and a result chip naming the model and its role; the PDF report prints the model role.
+- E4 candidate model card `backend/models/verifai_e4_candidate.model.json` (the checkpoint itself is never committed).
+- Tests: backend `test_model_registry.py` (12) and `test_store_atomic.py` (1); frontend model-selection tests (3) and a Playwright model-selection test.
+
+### Fixed
+- Job/result files are now written atomically and read with a short retry: a browser poll of `/status` could hit a half-written `job.json` while the video worker saved progress (HTTP 500, found during the multi-model smoke test).
+
+### Changed
+- `Dockerfile` and `render.yaml` set `VERIFAI_ENABLE_MODEL_SELECTION=false`: hosted instances offer only the model they serve.
+
 ## [2.0.0] — 2026-11-01 — Application build, retraining, evaluation
 
 ### Added

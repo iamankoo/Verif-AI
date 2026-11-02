@@ -58,3 +58,7 @@ backend/models/two_stream_model_epoch_[1-9].pth
 
 # report on the owner's private reference photo/video: local only
 docs/project-analysis/REFERENCE_MEDIA_TEST_REPORT.md
+
+# model checkpoints that are not stored in Git (see docs/E4_INTEGRATION.md): Model 4 and the E4 candidate stay local / on the host's disk
+backend/models/verifai_v3_celebdf_qa.pth
+backend/models/verifai_e4_candidate.pth
