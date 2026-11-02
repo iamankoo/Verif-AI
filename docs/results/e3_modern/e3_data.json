@@ -1,0 +1,252 @@
+{
+ "planned": {
+  "train/real_ffhq": 8000,
+  "val/real_ffhq": 1000,
+  "modern_test/real_ffhq": 1500,
+  "train/sfhq": 3000,
+  "val/sfhq": 500,
+  "modern_test/sfhq": 700,
+  "train/deepdetect_fake": 9000,
+  "val/deepdetect_fake": 1000,
+  "modern_test/deepdetect_fake": 2500
+ },
+ "kept": {
+  "train/real_ffhq": 7996,
+  "val/real_ffhq": 998,
+  "modern_test/real_ffhq": 1500,
+  "train/sfhq": 3000,
+  "val/sfhq": 500,
+  "modern_test/sfhq": 700,
+  "train/deepdetect_fake": 8997,
+  "val/deepdetect_fake": 1000,
+  "modern_test/deepdetect_fake": 2499
+ },
+ "leaks_removed": {
+  "val": 179,
+  "modern_test": 373
+ },
+ "composition": {
+  "train|dff|real|0": 1170,
+  "train|dff|inpainting|1": 561,
+  "train|dff|insight|1": 584,
+  "val|dff|real|0": 239,
+  "val|dff|inpainting|1": 116,
+  "val|dff|insight|1": 116,
+  "test_internal|dff|real|0": 292,
+  "test_internal|dff|insight|1": 142,
+  "test_internal|dff|inpainting|1": 141,
+  "test_crossgen|dff|real|0": 281,
+  "test_crossgen|dff|text2img|1": 287,
+  "train|celebdf_real|real|0": 4893,
+  "cdf_test|celebdf_real|real|0": 1453,
+  "val|celebdf_real|real|0": 540,
+  "train|celebdf_fake|celebdf_synthesis|1": 8429,
+  "cdf_test|celebdf_fake|celebdf_synthesis|1": 895,
+  "val|celebdf_fake|celebdf_synthesis|1": 825,
+  "val|youtube_real|real|0": 300,
+  "train|youtube_real|real|0": 2996,
+  "train|ffhq|real_ffhq|0": 7996,
+  "train|sfhq|sfhq|1": 3000,
+  "train|deepdetect|deepdetect_fake|1": 8997,
+  "modern_test|ffhq|real_ffhq|0": 1447,
+  "modern_test|sfhq|sfhq|1": 677,
+  "modern_test|deepdetect|deepdetect_fake|1": 2202,
+  "val|ffhq|real_ffhq|0": 966,
+  "val|sfhq|sfhq|1": 473,
+  "val|deepdetect|deepdetect_fake|1": 880
+ },
+ "sharpness": {
+  "cdf_test/celebdf_synthesis": {
+   "n": 895,
+   "lap_var_p10_50_90": [
+    9.1,
+    15.5,
+    25.3
+   ]
+  },
+  "cdf_test/real": {
+   "n": 1453,
+   "lap_var_p10_50_90": [
+    9.8,
+    15.8,
+    31.5
+   ]
+  },
+  "modern_test/deepdetect_fake": {
+   "n": 2202,
+   "lap_var_p10_50_90": [
+    159.1,
+    255.5,
+    547.3
+   ]
+  },
+  "modern_test/real_ffhq": {
+   "n": 1447,
+   "lap_var_p10_50_90": [
+    156.8,
+    306.8,
+    520.8
+   ]
+  },
+  "modern_test/sfhq": {
+   "n": 677,
+   "lap_var_p10_50_90": [
+    49.7,
+    153.2,
+    337.0
+   ]
+  },
+  "test_crossgen/real": {
+   "n": 281,
+   "lap_var_p10_50_90": [
+    86.5,
+    229.2,
+    496.3
+   ]
+  },
+  "test_crossgen/text2img": {
+   "n": 287,
+   "lap_var_p10_50_90": [
+    113.1,
+    242.2,
+    566.9
+   ]
+  },
+  "test_internal/inpainting": {
+   "n": 141,
+   "lap_var_p10_50_90": [
+    49.7,
+    156.5,
+    382.5
+   ]
+  },
+  "test_internal/insight": {
+   "n": 142,
+   "lap_var_p10_50_90": [
+    32.8,
+    87.2,
+    269.7
+   ]
+  },
+  "test_internal/real": {
+   "n": 292,
+   "lap_var_p10_50_90": [
+    62.0,
+    229.2,
+    569.2
+   ]
+  },
+  "train/celebdf_synthesis": {
+   "n": 8429,
+   "lap_var_p10_50_90": [
+    9.3,
+    15.2,
+    26.8
+   ]
+  },
+  "train/deepdetect_fake": {
+   "n": 8997,
+   "lap_var_p10_50_90": [
+    140.8,
+    257.1,
+    420.8
+   ]
+  },
+  "train/inpainting": {
+   "n": 561,
+   "lap_var_p10_50_90": [
+    46.4,
+    160.4,
+    528.1
+   ]
+  },
+  "train/insight": {
+   "n": 584,
+   "lap_var_p10_50_90": [
+    32.2,
+    81.1,
+    213.0
+   ]
+  },
+  "train/real": {
+   "n": 9059,
+   "lap_var_p10_50_90": [
+    9.9,
+    22.0,
+    112.6
+   ]
+  },
+  "train/real_ffhq": {
+   "n": 7996,
+   "lap_var_p10_50_90": [
+    188.9,
+    304.3,
+    632.1
+   ]
+  },
+  "train/sfhq": {
+   "n": 3000,
+   "lap_var_p10_50_90": [
+    70.4,
+    148.5,
+    393.6
+   ]
+  },
+  "val/celebdf_synthesis": {
+   "n": 825,
+   "lap_var_p10_50_90": [
+    10.0,
+    16.2,
+    31.9
+   ]
+  },
+  "val/deepdetect_fake": {
+   "n": 880,
+   "lap_var_p10_50_90": [
+    104.7,
+    246.1,
+    481.4
+   ]
+  },
+  "val/inpainting": {
+   "n": 116,
+   "lap_var_p10_50_90": [
+    54.3,
+    185.4,
+    466.0
+   ]
+  },
+  "val/insight": {
+   "n": 116,
+   "lap_var_p10_50_90": [
+    32.3,
+    85.4,
+    241.5
+   ]
+  },
+  "val/real": {
+   "n": 1079,
+   "lap_var_p10_50_90": [
+    12.8,
+    26.5,
+    206.9
+   ]
+  },
+  "val/real_ffhq": {
+   "n": 966,
+   "lap_var_p10_50_90": [
+    179.7,
+    293.8,
+    528.7
+   ]
+  },
+  "val/sfhq": {
+   "n": 473,
+   "lap_var_p10_50_90": [
+    60.3,
+    155.2,
+    299.7
+   ]
+  }
+ }
+}
