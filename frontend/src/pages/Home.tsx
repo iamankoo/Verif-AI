@@ -110,9 +110,7 @@ export function Home({ onOpen }: { onOpen: (id: string) => void }) {
                         value={modelId} onChange={(e) => setModelId(e.target.value)}>
                         {selectable.map((o) => <option key={o.id} value={o.id}>{o.label} - {o.role_label}</option>)}
                       </select>
-                      {picked && picked.role === "candidate" && (
-                        <p className="mt-2 text-xs text-ink-soft" data-testid="candidate-note">Candidate model for evaluation only. It is not approved for production: it failed the project's promotion rule on DeepFakeFace detection. Results are labelled with this model.</p>
-                      )}
+                      {picked && <p className="mt-2 text-xs text-ink-soft" data-testid="model-note">{picked.description} Results are labelled with this model.</p>}
                     </div>
                   )}
                   <div className="mt-4 flex flex-wrap gap-2">

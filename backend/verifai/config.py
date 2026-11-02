@@ -33,9 +33,11 @@ def _b(v: str) -> bool:
 
 
 def default_model_path() -> Path:
-    # Temporary default (owner decision, 2026-11-01): Model 4 (DFF + Celeb-DF + quality augmentation), see docs/CURRENT_DEFAULT_MODEL.md.
-    # The file is not in the repository; if it is absent the server falls back to production v2, then to the original prototype.
-    for cand in (BACKEND_DIR / "models" / "verifai_v3_celebdf_qa.pth",
+    # Default for the local examiner demonstration (owner decision, 2026-11-02): E4. Order of preference: E4, Model 4, v2, original prototype.
+    # E4 and Model 4 are not in the repository, so a fresh clone (and the hosted Docker image, which pins v2) falls back to v2.
+    # E4 is NOT approved for production (it failed frozen promotion criterion 2); see docs/CURRENT_DEFAULT_MODEL.md.
+    for cand in (BACKEND_DIR / "models" / "verifai_e4_candidate.pth",
+                 BACKEND_DIR / "models" / "verifai_v3_celebdf_qa.pth",
                  BACKEND_DIR / "models" / "verifai_v2_best.pth",
                  BACKEND_DIR / "scripts" / "two_stream_model_epoch_10.pth"):
         if cand.is_file():
@@ -47,15 +49,21 @@ def default_rollback_path() -> Path:
     return BACKEND_DIR / "models" / "verifai_v2_best.pth"          # production v2, kept unchanged
 
 
-def default_candidate_path() -> Path:
-    return BACKEND_DIR / "models" / "verifai_e4_candidate.pth"    # experiment E4: candidate only, not approved for production
+def default_alternative_path() -> Path:
+    return BACKEND_DIR / "models" / "verifai_v3_celebdf_qa.pth"      # Model 4: alternative model
+
+
+def default_e4_path() -> Path:
+    return BACKEND_DIR / "models" / "verifai_e4_candidate.pth"       # E4: latest trained model (not approved for production)
 
 
 @dataclass(frozen=True)
 class Settings:
     model_path: Path = field(default_factory=default_model_path)
     rollback_model_path: Path = field(default_factory=default_rollback_path)
-    candidate_model_path: Path = field(default_factory=default_candidate_path)
+    alternative_model_path: Path = field(default_factory=default_alternative_path)
+    e4_model_path: Path = field(default_factory=default_e4_path)
+    candidate_model_path: Optional[Path] = None   # extra experiment checkpoint, if any (role 'candidate')
     enable_model_selection: bool = True        # False on hosted deployments: only the default model is offered
     device: str = "auto"                      # auto | cpu | cuda | cuda:N
     storage_dir: Path = BACKEND_DIR / "storage"
@@ -94,7 +102,9 @@ class Settings:
         return Settings(
             model_path=Path(g("VERIFAI_MODEL_PATH", str(s.model_path))),
             rollback_model_path=Path(g("VERIFAI_ROLLBACK_MODEL_PATH", str(s.rollback_model_path))),
-            candidate_model_path=Path(g("VERIFAI_CANDIDATE_MODEL_PATH", str(s.candidate_model_path))),
+            alternative_model_path=Path(g("VERIFAI_ALTERNATIVE_MODEL_PATH", str(s.alternative_model_path))),
+            e4_model_path=Path(g("VERIFAI_E4_MODEL_PATH", str(s.e4_model_path))),
+            candidate_model_path=(Path(g("VERIFAI_CANDIDATE_MODEL_PATH", "")) if g("VERIFAI_CANDIDATE_MODEL_PATH", "") else None),
             enable_model_selection=_b(g("VERIFAI_ENABLE_MODEL_SELECTION", s.enable_model_selection)),
             device=g("VERIFAI_DEVICE", s.device),
             storage_dir=Path(g("VERIFAI_STORAGE_DIR", str(s.storage_dir))),

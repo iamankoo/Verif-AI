@@ -40,7 +40,8 @@ class Engine:
     def _tag(self, bundle: ModelBundle, model_id: str) -> ModelBundle:
         e = self.registry.entries.get(model_id)
         if e is not None:
-            bundle.info = bundle.info.model_copy(update={"registry_id": e.id, "role": e.role, "role_label": e.role_label})
+            bundle.info = bundle.info.model_copy(update={"registry_id": e.id, "role": e.role, "role_label": e.role_label,
+                                                       "registry_label": e.label, "registry_note": e.description})
         return bundle
 
     def loaded_ids(self):

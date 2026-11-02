@@ -2,11 +2,19 @@
 
 All notable changes to Verif-AI. Dates are ISO. Phase numbering follows the approved plan.
 
+## [2.2.0] — 2026-11-02 — E4 as the local demonstration default
+
+### Changed
+- **E4 is the default model for the local examiner demonstration** (first existing of E4, Model 4, v2; local `backend/.env` points to E4). Model 4 is an alternative, v2 the rollback; registry roles are now `default / alternative / rollback / candidate` with a status note per model (shown in the dashboard, the API and the PDF). E4 is not approved for production (frozen criterion 2) and is not deployed live; the Dockerfile still pins v2.
+- Dashboard: the model card names the default model and its status note; the picker shows the note of the chosen model.
+- `scripts/start-demo.ps1` / `.bat`: one-command local start (free port from 8000, E4 default, prints the loaded checkpoint).
+- Tests: default-order and hosted-image tests; backend 167 passed / 7 skipped, frontend 66 passed, Playwright 10 passed / 2 skipped.
+
 ## [2.1.0] — 2026-11-02 — E4 results and model registry
 
 ### Added
 - **Experiment E4 completed and recorded** (`docs/E4_RESULTS.md`, `docs/results/e4_modern/`): not promoted - fails frozen criterion 2 (DeepFakeFace missed-fake rate 0.208 / 0.509 against limits 0.160 / 0.409). Model 4 stays the default; v2 the rollback.
-- **Model registry** (`backend/verifai/registry.py`): production default / rollback / candidate roles, `GET /api/models`, optional `model` form field on the analysis endpoints, lazy loading of at most one optional model, `VERIFAI_ROLLBACK_MODEL_PATH`, `VERIFAI_CANDIDATE_MODEL_PATH`, `VERIFAI_ENABLE_MODEL_SELECTION`.
+- **Model registry** (`backend/verifai/registry.py`): default / alternative / rollback / candidate roles (E4 became the local default in 2.2.0), `GET /api/models`, optional `model` form field on the analysis endpoints, lazy loading of at most one optional model, `VERIFAI_ROLLBACK_MODEL_PATH`, `VERIFAI_CANDIDATE_MODEL_PATH`, `VERIFAI_ENABLE_MODEL_SELECTION`.
 - Dashboard: model picker (only where the server offers choices), candidate warning, and a result chip naming the model and its role; the PDF report prints the model role.
 - E4 candidate model card `backend/models/verifai_e4_candidate.model.json` (the checkpoint itself is never committed).
 - Tests: backend `test_model_registry.py` (12) and `test_store_atomic.py` (1); frontend model-selection tests (3) and a Playwright model-selection test.

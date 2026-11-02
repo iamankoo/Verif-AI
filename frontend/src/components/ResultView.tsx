@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import type { AnalysisResult, Classification } from "../types";
-import { fmt3, fmtBytes, fmtTime } from "../lib/format";
+import { fmt3, fmtBytes, fmtTime, shortModelName } from "../lib/format";
 import { FaceHeatmapViewer, FrameEvidenceViewer, pickFrameForRange } from "./HeatmapViewer";
 import { IconArrowLeft, IconCalendar, IconChart, IconClock, IconDownload, IconFile, IconGauge, IconImage, IconLayers, IconScan, IconStack, IconTrash, IconUser, IconVideo } from "./Icons";
 import { ScoreBars, VerdictBadge, VerdictBlurb } from "./Verdict";
@@ -109,8 +109,8 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
               <li className="chip"><IconCalendar className="h-3.5 w-3.5" /> {Number.isNaN(created.getTime()) ? "" : created.toLocaleString()}</li>
               <li className="chip">analysis {id.slice(0, 8)}</li>
               {result.model?.role_label && (
-                <li className={result.model.role === "candidate" ? "chip border-amber-500/60 text-amber-300" : "chip"} data-testid="model-chip">
-                  Model: {result.model.registry_id ?? result.model.name} &middot; {result.model.role_label}
+                <li className={result.model.role === "candidate" ? "chip border-amber-500/60 text-amber-300" : "chip"} data-testid="model-chip" title={result.model.registry_note ?? undefined}>
+                  Model: {shortModelName(result.model.registry_id, result.model.name)} &middot; {result.model.role_label}
                 </li>
               )}
             </ul>

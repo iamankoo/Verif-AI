@@ -1,6 +1,6 @@
 # Experiment E4 - results (completed, verified)
 
-**Status: completed. E4 was NOT promoted. Model 4 stays the production default; v2 stays the rollback; E4 is a selectable *candidate* only.**
+**Status: completed. E4 did NOT pass the production-promotion rule. By owner decision (2026-11-02) it is the default model of the local examiner demonstration only; Model 4 is an alternative, v2 stays the rollback and the model served by the live website. E4 is not deployed live.**
 Protocol: [E3_PROTOCOL.md](E3_PROTOCOL.md) + [E4_PROTOCOL_ADDENDUM.md](E4_PROTOCOL_ADDENDUM.md) (frozen before training). Nothing below changed the protocol, a threshold or a dataset.
 
 ## What E4 is

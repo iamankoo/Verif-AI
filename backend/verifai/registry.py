@@ -1,12 +1,14 @@
 """Model registry: which checkpoints the application knows about and what role each one plays.
 
-Roles (see docs/MODEL_REGISTRY.md):
-  * ``production`` -- the checkpoint the server loads at start-up (``VERIFAI_MODEL_PATH``; Model 4 by default). Every request that does not
-    name a model uses it.
-  * ``rollback``   -- production v2, kept unchanged so the default can be switched back at any time.
-  * ``candidate``  -- experiment checkpoints that are selectable for evaluation only (currently E4). A candidate is **not** approved for
-    production: it failed the frozen promotion rule (criterion 2, DeepFakeFace missed-fake rate). Selecting one never changes the default.
+Roles (see docs/E4_INTEGRATION.md):
+  * ``default``     -- the checkpoint the server loads at start-up (``VERIFAI_MODEL_PATH``). Every request that does not name a model uses it.
+                       Locally this is E4 (the model chosen for the examiner demonstration); the hosted free-tier demo serves v2.
+  * ``alternative`` -- another trained model that can be selected per analysis (Model 4, E4 when it is not the default).
+  * ``rollback``    -- production v2, kept unchanged so the default can be switched back at any time.
+  * ``candidate``   -- extra experiment checkpoints supplied through ``VERIFAI_CANDIDATE_MODEL_PATH`` (none by default).
 
+Being the default does NOT mean a model passed the project's frozen promotion rule: E4 did not (criterion 2). Every model carries a
+status note that says so and that note is shown in the dashboard and printed in the PDF report.
 Nothing here changes a checkpoint, a threshold or an evaluation protocol.
 """
 from __future__ import annotations
@@ -17,18 +19,23 @@ from typing import Dict, List, Optional
 
 from .config import Settings
 
-# Known checkpoint files -> (registry id, label, short description). A checkpoint that is not listed gets an id derived from its file name.
+# Known checkpoint files -> (registry id, label, status note). A checkpoint that is not listed gets an id derived from its file name.
 KNOWN = {
-    "verifai_v3_celebdf_qa.pth": ("model4", "Model 4 (DeepFakeFace + Celeb-DF + quality augmentation)",
-                                  "Current default (owner decision 2026-11-01). Fixes false alarms on genuine video; weaker than v2 on DeepFakeFace fakes."),
-    "verifai_v2_best.pth": ("v2", "v2 (DeepFakeFace only)",
-                            "Production v2 and the rollback model. Best on DeepFakeFace; at chance level on held-out Celeb-DF video."),
-    "verifai_e4_candidate.pth": ("e4", "E4 (candidate: DeepFakeFace x4 + Celeb-DF + modern generators, quality augmentation)",
-                                 "Candidate only. Failed promotion criterion 2 (DeepFakeFace missed-fake rate 0.208 internal, 0.509 cross-generator)."),
+    "verifai_e4_candidate.pth": (
+        "e4", "E4 (DeepFakeFace x4 + Celeb-DF + modern generators, quality augmentation)",
+        "Latest trained model, selected as the default for the local examiner demonstration. It failed frozen promotion criterion 2 "
+        "(DeepFakeFace missed-fake rate 0.208 internal, 0.509 cross-generator), so it is not approved for production and is not deployed live."),
+    "verifai_v3_celebdf_qa.pth": (
+        "model4", "Model 4 (DeepFakeFace + Celeb-DF + quality augmentation)",
+        "Previous default (owner decision 2026-11-01). Fixes false alarms on genuine video; weaker than v2 on DeepFakeFace fakes."),
+    "verifai_v2_best.pth": (
+        "v2", "v2 (DeepFakeFace only)",
+        "Production v2: the rollback model and the model served by the live deployment. Best on DeepFakeFace; at chance level on held-out Celeb-DF video."),
 }
 
 ROLE_LABEL = {
-    "production": "Production default",
+    "default": "Default model",
+    "alternative": "Alternative model",
     "rollback": "Rollback model",
     "candidate": "Candidate - not approved for production",
 }
@@ -52,18 +59,22 @@ class RegisteredModel:
 
 
 def _entry(path: Path, role: str) -> RegisteredModel:
-    mid, label, desc = KNOWN.get(path.name, (path.stem.lower().replace(" ", "-"), path.stem, "Custom checkpoint."))
-    return RegisteredModel(id=mid, role=role, label=label, description=desc, path=path)
+    mid, label, note = KNOWN.get(path.name, (path.stem.lower().replace(" ", "-"), path.stem, "Custom checkpoint."))
+    return RegisteredModel(id=mid, role=role, label=label, description=note, path=path)
 
 
 class ModelRegistry:
     def __init__(self, settings: Settings):
         self.settings = settings
-        entries: List[RegisteredModel] = [_entry(settings.model_path, "production")]
-        extra = [(settings.rollback_model_path, "rollback"), (settings.candidate_model_path, "candidate")]
+        entries: List[RegisteredModel] = [_entry(settings.model_path, "default")]
+        extra = [(settings.alternative_model_path, "alternative"), (settings.rollback_model_path, "rollback"),
+                 (settings.e4_model_path, "alternative"), (settings.candidate_model_path, "candidate")]
         for p, role in extra:
             if p and Path(p) != settings.model_path:
-                entries.append(_entry(Path(p), role))
+                e = _entry(Path(p), role)
+                if role == "alternative" and e.id == "v2":
+                    e = _entry(Path(p), "rollback")        # v2 is always the rollback model
+                entries.append(e)
         seen: Dict[str, RegisteredModel] = {}
         for e in entries:                    # first entry wins when two roles point at the same file
             seen.setdefault(e.id, e)
@@ -71,7 +82,7 @@ class ModelRegistry:
         self.default_id = entries[0].id
 
     def selectable(self, model_id: str) -> bool:
-        """The default is always selectable; others only when candidate/rollback selection is enabled and the file exists."""
+        """The default is always selectable; others only when selection is enabled and the file exists."""
         e = self.entries.get(model_id)
         if e is None:
             return False

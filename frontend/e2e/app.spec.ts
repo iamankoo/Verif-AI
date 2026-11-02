@@ -182,27 +182,27 @@ test("public image: upload, progress, results, Grad-CAM, PDF, deletion", async (
   expect((await request.get(`${API}/api/analyses/${id}/report.pdf`)).status()).toBe(404);
 });
 
-test("model selection: the production default is preselected; the E4 candidate is labelled and recorded in the result", async ({ page, request }) => {
+test("model selection: the default is preselected and labelled; another model can be chosen and is recorded in the result", async ({ page, request }) => {
   test.skip(!PUBLIC_IMAGE, "VERIFAI_E2E_IMAGE not set");
   const list = await (await request.get(`${API}/api/models`)).json();
-  test.skip(!list.selection_enabled || list.models.filter((m: { selectable: boolean }) => m.selectable).length < 2, "this server offers only its default model");
+  const selectable = list.models.filter((m: { selectable: boolean }) => m.selectable);
+  test.skip(!list.selection_enabled || selectable.length < 2, "this server offers only its default model");
   await page.goto("/#/");
   await page.locator("input[type=file]").setInputFiles(PUBLIC_IMAGE);
   const select = page.getByTestId("model-select");
   await expect(select).toBeVisible();
   await expect(select).toHaveValue(list.default);
-  const cand = list.models.find((m: { role: string; selectable: boolean }) => m.role === "candidate" && m.selectable);
-  test.skip(!cand, "no candidate model on this server");
-  await select.selectOption(cand.id);
-  await expect(page.getByTestId("candidate-note")).toContainText(/not approved for production/i);
+  await expect(page.getByTestId("model-picker").getByTestId("model-note")).toBeVisible();
+  const other = selectable.find((m: { id: string }) => m.id !== list.default);
+  await select.selectOption(other.id);
   await page.getByRole("button", { name: /analyse image/i }).click();
   await expect(page.getByTestId("result-view")).toBeVisible({ timeout: 180_000 });
   const id = page.url().split("/").pop()!;
   const res = await (await request.get(`${API}/api/analyses/${id}`)).json();
-  expect(res.model.registry_id).toBe(cand.id);
-  expect(res.model.role).toBe("candidate");
-  await expect(page.getByTestId("model-chip")).toContainText(/Candidate - not approved for production/i);
-  // the default is unchanged by using a candidate
+  expect(res.model.registry_id).toBe(other.id);
+  expect(res.model.role).toBe(other.role);
+  await expect(page.getByTestId("model-chip")).toContainText(other.role_label);
+  // using another model does not change the default
   expect((await (await request.get(`${API}/api/models`)).json()).default).toBe(list.default);
   await request.delete(`${API}/api/analyses/${id}`);
 });

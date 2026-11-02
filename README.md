@@ -25,17 +25,21 @@ image / video ─► decode ─► MTCNN face crop (224, margin 20) ─► JPEG 
 ```
 11,972,954 parameters; decision threshold fixed at 0.5. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Current default model (temporary)
-The server currently loads **Model 4** (`backend/models/verifai_v3_celebdf_qa.pth`: DeepFakeFace + Celeb-DF, with quality augmentation) by default, as an owner decision while more data is tested. It handles genuine camera video far better than v2 but is **weaker at detecting some AI-generated images**; the measured trade-offs and the rollback (`VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`) are in [docs/CURRENT_DEFAULT_MODEL.md](docs/CURRENT_DEFAULT_MODEL.md). The sections below describe the production model v2.
-
-### Model registry: production default, rollback, candidate
+## Models: E4 is the default for the local demonstration
 | Role | Model | File (not all in Git) | How it is used |
 |---|---|---|---|
-| **Production default** | Model 4 | `backend/models/verifai_v3_celebdf_qa.pth` (local / host disk only) | used whenever a request names no model (`VERIFAI_MODEL_PATH`) |
-| **Rollback** | v2 | `backend/models/verifai_v2_best.pth` (in Git) | `VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`, or select it per analysis |
-| **Candidate (not approved)** | E4 | `backend/models/verifai_e4_candidate.pth` (local only; SHA-256 `0d553de9...f9cba0`) | selectable for evaluation only; results are labelled *Candidate - not approved for production* |
+| **Default (local demonstration)** | **E4** | `backend/models/verifai_e4_candidate.pth` (local only; SHA-256 `0d553de9...f9cba0`) | loaded automatically at start-up when the file is present (first of E4, Model 4, v2) |
+| **Alternative** | Model 4 | `backend/models/verifai_v3_celebdf_qa.pth` (local only) | selectable per analysis in the dashboard picker / API field `model=model4` |
+| **Rollback** | v2 | `backend/models/verifai_v2_best.pth` (in Git) | selectable (`model=v2`); `VERIFAI_MODEL_PATH=models/verifai_v2_best.pth` makes it the default; **the live website serves v2** |
 
-E4 completed training and was evaluated, but it **failed the frozen promotion rule** (criterion 2: DeepFakeFace missed-fake rate 0.208 internal vs. limit 0.160; 0.509 cross-generator vs. limit 0.409), so it is a candidate only. Results: [docs/E4_RESULTS.md](docs/E4_RESULTS.md); registry, selection API and hosting limits: [docs/E4_INTEGRATION.md](docs/E4_INTEGRATION.md). Use it locally: put the checkpoint in `backend/models/`, start the server and pick the model in the upload card (or send form field `model=e4`). Hosted instances expose only the model they serve (`VERIFAI_ENABLE_MODEL_SELECTION=false`).
+E4 is the latest trained model (held-out accuracy: DeepFakeFace internal 0.831, cross-generator 0.688, Celeb-DF video 0.980, `modern_test` 0.983) but it **failed the frozen production-promotion rule** (criterion 2: DeepFakeFace missed-fake rate 0.208 internal vs. limit 0.160; 0.509 cross-generator vs. limit 0.409). It is the default of the **local examiner demonstration by owner decision**, it is **not deployed live** (the free Render host cannot hold it), and every result and PDF says which model produced it. v2 is still best on DeepFakeFace. Results: [docs/E4_RESULTS.md](docs/E4_RESULTS.md); registry, selection API, hosting limits and rollback: [docs/E4_INTEGRATION.md](docs/E4_INTEGRATION.md); history of the previous default: [docs/CURRENT_DEFAULT_MODEL.md](docs/CURRENT_DEFAULT_MODEL.md).
+
+### Start the local demonstration (E4 loads automatically)
+```powershell
+# Windows: one command (builds the frontend once, picks a free port from 8000, starts the API and opens the browser)
+powershell -ExecutionPolicy Bypass -File scripts\start-demo.ps1        # or double-click scripts\start-demo.bat
+```
+Manual alternative: `cd backend` -> activate the venv -> `set VERIFAI_FRONTEND_DIR=..\frontend\dist` -> `python -m uvicorn verifai.api.app:app --port 8000`. `GET /api/model` must report `checkpoint_file verifai_e4_candidate.pth`.
 
 ## Live deployment
 | Part | Where | Notes |

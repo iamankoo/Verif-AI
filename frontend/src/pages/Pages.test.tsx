@@ -53,11 +53,11 @@ describe("Home", () => {
 
   describe("model selection", () => {
     const LIST = {
-      default: "model4", selection_enabled: true,
+      default: "e4", selection_enabled: true,
       models: [
-        { id: "model4", label: "Model 4", role: "production", role_label: "Production default", description: "", checkpoint_file: "m4.pth", available: true, selectable: true, is_default: true, loaded: true },
-        { id: "v2", label: "v2", role: "rollback", role_label: "Rollback model", description: "", checkpoint_file: "v2.pth", available: true, selectable: true, is_default: false, loaded: false },
-        { id: "e4", label: "E4", role: "candidate", role_label: "Candidate - not approved for production", description: "", checkpoint_file: "e4.pth", available: true, selectable: true, is_default: false, loaded: false },
+        { id: "e4", label: "E4", role: "default", role_label: "Default model", description: "Selected for the local demonstration; not approved for production.", checkpoint_file: "e4.pth", available: true, selectable: true, is_default: true, loaded: true },
+        { id: "model4", label: "Model 4", role: "alternative", role_label: "Alternative model", description: "Previous default.", checkpoint_file: "m4.pth", available: true, selectable: true, is_default: false, loaded: false },
+        { id: "v2", label: "v2", role: "rollback", role_label: "Rollback model", description: "Rollback; live deployment.", checkpoint_file: "v2.pth", available: true, selectable: true, is_default: false, loaded: false },
       ],
     };
 
@@ -69,31 +69,33 @@ describe("Home", () => {
       expect(screen.queryByTestId("model-select")).not.toBeInTheDocument();
     });
 
-    it("keeps the production default selected and sends no model id for it", async () => {
+    it("preselects the default model (E4), shows its status note and sends no model id for it", async () => {
       m.models.mockResolvedValue(LIST);
       m.analyzeImage.mockResolvedValue(REAL_IMAGE);
       render(<Home onOpen={() => undefined} />);
       await upload("face.png", "image/png");
       const sel = (await screen.findByTestId("model-select")) as HTMLSelectElement;
-      expect(sel.value).toBe("model4");
-      expect(screen.queryByTestId("candidate-note")).not.toBeInTheDocument();
+      expect(sel.value).toBe("e4");
+      expect(sel).toHaveTextContent(/E4 - Default model/);
+      expect(screen.getByTestId("model-note")).toHaveTextContent(/not approved for production/i);
       await userEvent.click(screen.getByRole("button", { name: /analyse image/i }));
       await waitFor(() => expect(m.analyzeImage).toHaveBeenCalledTimes(1));
       expect(m.analyzeImage.mock.calls[0][2]).toBeUndefined();
     });
 
-    it("labels the candidate, warns that it is not approved and sends its id", async () => {
+    it("lets the user switch to Model 4 or v2 and sends that id", async () => {
       m.models.mockResolvedValue(LIST);
       m.analyzeImage.mockResolvedValue(REAL_IMAGE);
       render(<Home onOpen={() => undefined} />);
       await upload("face.png", "image/png");
       const sel = await screen.findByTestId("model-select");
-      expect(sel).toHaveTextContent(/E4 - Candidate - not approved for production/);
-      await userEvent.selectOptions(sel, "e4");
-      expect(screen.getByTestId("candidate-note")).toHaveTextContent(/not approved for production/i);
+      expect(sel).toHaveTextContent(/Model 4 - Alternative model/);
+      expect(sel).toHaveTextContent(/v2 - Rollback model/);
+      await userEvent.selectOptions(sel, "v2");
+      expect(screen.getByTestId("model-note")).toHaveTextContent(/Rollback; live deployment/);
       await userEvent.click(screen.getByRole("button", { name: /analyse image/i }));
       await waitFor(() => expect(m.analyzeImage).toHaveBeenCalledTimes(1));
-      expect(m.analyzeImage.mock.calls[0][2]).toBe("e4");
+      expect(m.analyzeImage.mock.calls[0][2]).toBe("v2");
     });
   });
 

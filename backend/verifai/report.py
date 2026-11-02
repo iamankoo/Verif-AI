@@ -128,7 +128,8 @@ def build_pdf(result: AnalysisResult, artifacts_dir: Optional[Path]) -> bytes:
         ("Resolution", f"{result.image_width} x {result.image_height}" if result.image_width else "n/a"),
         ("Faces analysed", str(result.faces_detected)),
         ("Model", f"{m.name} v{m.version} ({m.architecture})" if m else "n/a"),
-        ("Model role", f"{m.role_label} [{m.registry_id}]" if (m and m.role_label) else "not recorded"),
+        ("Model role", f"{m.registry_label or m.name} [{m.registry_id}] - {m.role_label}" if (m and m.role_label) else "not recorded"),
+        ("Model status", m.registry_note if (m and m.registry_note) else "not recorded"),
         ("Checkpoint", f"{m.checkpoint_file}  sha256 {m.checkpoint_sha256[:16]}..." if m else "n/a"),
         ("Device / threshold", f"{m.device} / {m.decision_threshold}" if m else "n/a"),
         ("Aggregation", result.aggregation_note or "n/a")])]

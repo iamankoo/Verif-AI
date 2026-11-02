@@ -4,6 +4,13 @@ Short version for Windows PowerShell. Full explanations: [USER_RUNNING_GUIDE.md]
 
 Verif-AI runs on **CPU** (no GPU needed). Tested with Python 3.10 and Node.js 24 / npm 11. No API keys or environment variables are required.
 
+## Examiner demonstration (E4 default) - one command
+```powershell
+cd Verif-AI
+powershell -ExecutionPolicy Bypass -File scripts\start-demo.ps1     # or double-click scripts\start-demo.bat
+```
+It builds the frontend once if needed, starts the API on the first free port from 8000 and opens the browser. The console prints `Default model: E4 ... checkpoint verifai_e4_candidate.pth`; the dashboard home page shows the same under *Model Information*. Switch models in the upload card (Model 4 = alternative, v2 = rollback). Requires `backend/models/verifai_e4_candidate.pth` (otherwise Model 4, then v2 is used - see `docs/E4_INTEGRATION.md`). Stop with Ctrl+C.
+
 ## A. First time only (about 10–20 minutes, needs internet)
 ```powershell
 git clone https://github.com/iamankoo/Verif-AI.git

@@ -47,7 +47,8 @@ export function ModelCard({ info, health, compact = false }: { info: ModelRespon
     <div className="card-glow min-w-0 p-5" data-testid="model-card">
       <PanelTitle icon={<IconChip className="h-7 w-7" />} title="Model Information" />
       <dl>
-        <Row icon={<IconLayers className="h-5 w-5" />} k="Model">{m.name} v{m.version}</Row>
+        <Row icon={<IconLayers className="h-5 w-5" />} k="Model"><span data-testid="model-name">{m.registry_label ?? `${m.name} v${m.version}`}</span></Row>
+        {m.registry_note && <p className="mb-2 mt-1 text-xs text-ink-soft" data-testid="model-note">{m.registry_note}</p>}
         <Row icon={<IconStack className="h-5 w-5" />} k="Architecture">Two-stream EfficientNet-B0 (RGB + SRM noise residual)</Row>
         <Row icon={<IconActivity className="h-5 w-5" />} k="Status">
           <span className="inline-flex items-center gap-2 rounded-full border border-real/40 bg-real-soft px-3 py-0.5 text-real"><span className="h-2 w-2 rounded-full bg-real" aria-hidden="true" /> {health?.model_loaded ? "Active" : "Loaded"}</span>

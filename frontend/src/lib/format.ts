@@ -44,3 +44,9 @@ export function validateFile(
   if (file.size > max) return { error: `The file is ${fmtBytes(file.size)}; the limit for ${kind}s is ${kind === "image" ? limits.max_image_mb : limits.max_video_mb} MB.` };
   return { kind };
 }
+
+/** Short display name for a registry id (the full label is shown in the model card). */
+export function shortModelName(id?: string | null, fallback = ""): string {
+  const map: Record<string, string> = { e4: "E4", model4: "Model 4", v2: "v2" };
+  return (id && map[id]) || id || fallback;
+}

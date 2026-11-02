@@ -20,7 +20,7 @@ Status of the delivery plan. "Done" means the listed verification was actually e
 | 14 | Final verification | Done | completion report |
 | 15 | GitHub delivery | Done — pushed to `main` and verified on GitHub | completion report |
 | 16 | Experiments E1-E4 (shortcut diagnosis, stage-0 gate, modern-generator and source-balanced training under a frozen promotion rule) | Done - **no candidate promoted** (E3A and E4 fail criterion 2) | `docs/E1_QUALITY_BIN_DIAGNOSTIC.md`, `docs/E3_RESULTS.md`, `docs/E4_RESULTS.md` |
-| 17 | Model registry: Model 4 default, v2 rollback, E4 selectable candidate (API, dashboard, labelled results) | Done - tests: see `docs/E4_INTEGRATION.md` | `backend/verifai/registry.py`, `backend/tests/test_model_registry.py` |
+| 17 | Model registry: E4 default for the local demonstration, Model 4 alternative, v2 rollback (API, dashboard, labelled results); `scripts/start-demo.ps1` | Done - tests: see `docs/E4_INTEGRATION.md` | `backend/verifai/registry.py`, `backend/tests/test_model_registry.py` |
 | 18 | Redeploy (Render backend + Vercel frontend) and live verification | Done 2026-11-02 - live API serves **v2** (Model 4 / E4 cannot be hosted on the free tier); live E2E 9 passed / 3 skipped - see `docs/E4_INTEGRATION.md` section 7 | `docs/DEPLOYMENT.md` |
 
 ## Not done / out of scope

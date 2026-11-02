@@ -15,14 +15,16 @@ export interface ModelInfo {
   training_notes?: string | null;
   metrics_note?: string | null;
   registry_id?: string | null;
-  role?: "production" | "rollback" | "candidate" | null;
+  role?: "default" | "alternative" | "rollback" | "candidate" | null;
   role_label?: string | null;
+  registry_label?: string | null;
+  registry_note?: string | null;
 }
 
 export interface ModelOption {
   id: string;
   label: string;
-  role: "production" | "rollback" | "candidate";
+  role: "default" | "alternative" | "rollback" | "candidate";
   role_label: string;
   description: string;
   checkpoint_file: string;

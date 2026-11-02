@@ -1,6 +1,8 @@
-# Current default model: Model 4 (temporary)
+# Default models (history: Model 4 on 2026-11-01; E4 for the local demonstration since 2026-11-02)
 
 **Status:** since 2026-11-01 the application loads **Model 4** by default. This is an owner decision made while more data is tested; it is **not** a claim that Model 4 is the better detector. The model will be reconsidered after those tests. Production **v2** is kept unchanged as the rollback.
+
+> **Update 2026-11-02.** For the local examiner demonstration the default is now **E4** (`verifai_e4_candidate.pth`, owner decision). Model 4 became an *alternative* model and v2 stays the rollback and the model served by the live website. E4 failed the frozen promotion rule (criterion 2), so it is not approved for production and is not deployed live. The text below describes the earlier Model 4 default and remains valid for Model 4. See [E4_INTEGRATION.md](E4_INTEGRATION.md).
 
 | | Model 4 (current default) | v2 (rollback) |
 |---|---|---|

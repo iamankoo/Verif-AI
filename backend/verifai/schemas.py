@@ -50,8 +50,10 @@ class ModelInfo(BaseModel):
     training_notes: Optional[str] = None
     metrics_note: Optional[str] = None
     registry_id: Optional[str] = None            # model registry id (model4 / v2 / e4 / ...)
-    role: Optional[str] = None                   # production | rollback | candidate
+    role: Optional[str] = None                   # default | alternative | rollback | candidate
     role_label: Optional[str] = None
+    registry_label: Optional[str] = None         # human-readable model name from the registry
+    registry_note: Optional[str] = None          # status note (e.g. promotion status)
 
 
 class FaceResult(BaseModel):
