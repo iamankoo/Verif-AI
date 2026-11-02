@@ -4,7 +4,7 @@
 
 Verif-AI is a two-stream EfficientNet-B0 classifier (RGB stream + fixed SRM-style noise-residual stream) wrapped in a FastAPI backend and a React frontend. Everything runs locally; no external AI service or API key is used.
 
-> **What it is, and is not.** It analyses *faces*. It was trained and evaluated on one openly licensed dataset (a sample of DeepFakeFace). It is **not** a general "is this AI-generated?" detector, its scores are **not calibrated probabilities**, and a REAL result is **not proof of authenticity**. Read [Results](#results-and-limitations) before relying on it.
+> **What it is, and is not.** It analyses *faces*. Production model v2 was trained and evaluated on a sample of DeepFakeFace; the current default Model 4 adds Celeb-DF video frames (research-use data). It is **not** a general "is this AI-generated?" detector, its scores are **not calibrated probabilities**, and a REAL result is **not proof of authenticity**. Read [Results](#results-and-limitations) before relying on it.
 
 ![Result page](docs/screenshots/desktop-03-result.png)
 
@@ -27,6 +27,16 @@ image / video ─► decode ─► MTCNN face crop (224, margin 20) ─► JPEG 
 
 ## Current default model (temporary)
 The server currently loads **Model 4** (`backend/models/verifai_v3_celebdf_qa.pth`: DeepFakeFace + Celeb-DF, with quality augmentation) by default, as an owner decision while more data is tested. It handles genuine camera video far better than v2 but is **weaker at detecting some AI-generated images**; the measured trade-offs and the rollback (`VERIFAI_MODEL_PATH=models/verifai_v2_best.pth`) are in [docs/CURRENT_DEFAULT_MODEL.md](docs/CURRENT_DEFAULT_MODEL.md). The sections below describe the production model v2.
+
+## Live deployment
+| Part | Where | Notes |
+|---|---|---|
+| Frontend | https://verfai.vercel.app (Vercel, static build of `frontend/`) | hash routes, so refresh and deep links work; the API origin is the build-time variable `VITE_API_BASE_URL` |
+| Backend API | https://verifai-api-11wg.onrender.com (Render, Docker, **free tier**, branch `release/live`) | health `/api/health`, docs `/docs`; CORS allows only the Vercel origin |
+The free Render instance has 512 MB RAM, so it runs in **lite mode**: the repository's production model v2 (Model 4 is not in Git), **Grad-CAM heat-maps switched off** (the UI says so instead of showing nothing), small batches, short uploads, no persistent disk (results disappear on restart) and a cold start of about a minute after idle. Full functionality (Model 4, heat-maps, durable results) needs a plan with at least 2 GB RAM and a disk, or running the app locally; the measured numbers, setup steps and checklist are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Do not upload personal media to the public demo.
+
+## Research status
+Experiments E1-E4 (quality-shortcut diagnosis, stage-0 gate, modern-generator training) are documented in `docs/` (`E1_QUALITY_BIN_DIAGNOSTIC.md`, `STAGE0_GATE_VALIDATION.md`, `FOUR_MODEL_COMPARISON.md`, `E3_PROTOCOL.md`, `E3_RESULTS.md`, `E4_PROTOCOL_ADDENDUM.md`) with the dataset review in [docs/DATASET_LICENCE_REVIEW.md](docs/DATASET_LICENCE_REVIEW.md). Short version: no model has met the pre-registered promotion rule; the E3 models detect held-out modern fakes (not generator-disjoint) but not better than Model 4 on DeepFakeFace; nothing supports a claim of general AI-image or AI-video detection.
 
 ## Results and limitations
 Selected model: **`verifai_v2_best.pth`** — a two-stream network initialised from ImageNet and trained on the DeepFakeFace sample on a Kaggle Tesla T4. Chosen among three trained configurations **by validation ROC-AUC only**; the test splits were never used for selection. Threshold 0.5. Frame-level metrics on identity-disjoint splits (95 % bootstrap CIs in the full report):
@@ -80,7 +90,8 @@ backend/verifai/     application core (model, preprocessing, faces, scoring, ima
 backend/training/    dataset preparation, validation, training, evaluation, video tooling
 backend/tests/       pytest suite            backend/tools/e2e_smoke.py   end-to-end smoke test
 backend/models/      verifai_v2_best.pth (+ model card)      backend/scripts/  original prototype (checkpoint, notebook, plots)
-frontend/            React + TypeScript + Tailwind + Vite (Vitest tests)
+frontend/            React + TypeScript + Tailwind + Vite (Vitest unit tests, Playwright E2E, vercel.json)
+render.yaml          Render blueprint for the API (Dockerfile at the repository root)
 kaggle/              Kaggle bundle builder and instructions
 docs/                architecture, evaluation, dataset, API, user/installation guides, results, figures, screenshots, research history
 ```
