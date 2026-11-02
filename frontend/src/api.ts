@@ -1,4 +1,4 @@
-import type { AnalysisResult, AnalysisSummary, Health, JobState, ModelResponse } from "./types";
+import type { AnalysisResult, AnalysisSummary, Health, JobState, ModelResponse, ModelList } from "./types";
 
 /** Backend origin for production builds, e.g. https://verifai-api.onrender.com (no trailing slash needed). Empty = same origin (dev proxy / single-container deployment).
  *  VITE_API_BASE_URL is the documented name; VITE_API_BASE is still read for older setups. These values are public (they are baked into the bundle): never put secrets here. */
@@ -43,7 +43,7 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 /** XHR upload so that large videos can report upload progress. */
-function upload<T>(path: string, file: File, onProgress?: (fraction: number) => void): Promise<T> {
+function upload<T>(path: string, file: File, onProgress?: (fraction: number) => void, model?: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${BASE}${path}`);
@@ -61,6 +61,7 @@ function upload<T>(path: string, file: File, onProgress?: (fraction: number) => 
     };
     const fd = new FormData();
     fd.append("file", file);
+    if (model) fd.append("model", model);       // omitted = the server's default (production) model
     xhr.send(fd);
   });
 }
@@ -68,8 +69,9 @@ function upload<T>(path: string, file: File, onProgress?: (fraction: number) => 
 export const api = {
   health: () => fetch(`${BASE}/health`).then((r) => json<Health>(r)),
   model: () => fetch(`${BASE}/model`).then((r) => json<ModelResponse>(r)),
-  analyzeImage: (file: File, onProgress?: (f: number) => void) => upload<AnalysisResult>("/analyze/image", file, onProgress),
-  analyzeVideo: (file: File, onProgress?: (f: number) => void) => upload<JobState>("/analyze/video", file, onProgress),
+  models: () => fetch(`${BASE}/models`).then((r) => json<ModelList>(r)),
+  analyzeImage: (file: File, onProgress?: (f: number) => void, model?: string) => upload<AnalysisResult>("/analyze/image", file, onProgress, model),
+  analyzeVideo: (file: File, onProgress?: (f: number) => void, model?: string) => upload<JobState>("/analyze/video", file, onProgress, model),
   status: (id: string) => fetch(`${BASE}/analyses/${id}/status`).then((r) => json<JobState>(r)),
   result: (id: string) => fetch(`${BASE}/analyses/${id}`).then((r) => json<AnalysisResult>(r)),
   list: () => fetch(`${BASE}/analyses?limit=20`).then((r) => json<AnalysisSummary[]>(r)),
