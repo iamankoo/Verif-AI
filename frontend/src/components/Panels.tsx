@@ -40,6 +40,7 @@ export function ModelCard({ info, health, compact = false }: { info: ModelRespon
     ["Decision threshold", String(m.decision_threshold)],
     ["Inconclusive band", `+/- ${info.limits.uncertainty_margin} around 0.5`],
     ["Checkpoint", `${m.checkpoint_file} (${m.checkpoint_sha256.slice(0, 10)}...)`],
+    ...(m.role_label ? ([["Role", m.role_label]] as [string, string][]) : []),
     ["Grad-CAM", info.explainability.grad_cam_available ? "available" : "unavailable"],
   ];
   return (

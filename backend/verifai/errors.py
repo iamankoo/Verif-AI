@@ -41,3 +41,9 @@ class JobCancelled(VerifAIError):
 class ModelUnavailableError(VerifAIError):
     http_status = 503
     code = "model_unavailable"
+
+
+class UnknownModelError(VerifAIError):
+    """The requested model id is not registered or not selectable here (HTTP 422)."""
+    http_status = 422
+    code = "unknown_model"

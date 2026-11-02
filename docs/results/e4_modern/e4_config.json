@@ -1,0 +1,48 @@
+{
+  "manifest": "manifests/combined_modern_manifest.csv",
+  "train_splits": [
+    "train"
+  ],
+  "val_splits": [
+    "val"
+  ],
+  "init": "imagenet",
+  "name": "e4a_dffx4_modern_qa0.5",
+  "out": "/kaggle/working/runs",
+  "epochs": 12,
+  "batch_size": 32,
+  "lr": 0.0001,
+  "weight_decay": 0.0001,
+  "patience": 4,
+  "seed": 42,
+  "workers": 2,
+  "max_minutes": 0,
+  "no_aug": false,
+  "quality_aug": 0.5,
+  "select": "clean_degraded_mean",
+  "limit_train": 0,
+  "limit_val": 0,
+  "model_version": "2.0",
+  "device": "cuda",
+  "n_train": 45571,
+  "n_val": 4455,
+  "train_real": 20565,
+  "train_fake": 25006,
+  "pos_weight": 0.8224025964736938,
+  "torch": "2.11.0+cu128",
+  "python": "3.13.15",
+  "manifest_sha256": "3de5022b036d1d0a6ccf460c81c117d751ede1d3dfad95cd9701fb8b4c4aecc0",
+  "git_commit": "unknown",
+  "augmentation": {
+    "flip": 0.5,
+    "jitter": true,
+    "blur_p": 0.2,
+    "jpeg_p": 0.5,
+    "jpeg_q": [
+      60,
+      95
+    ],
+    "quality_p": 0.5
+  },
+  "started": "2026-11-02T04:24:36.906289+00:00"
+}

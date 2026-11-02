@@ -57,6 +57,9 @@ flowchart TB
 ```
 `TwoStreamNet.logits()` returns the pre-sigmoid value (used for stable BCE-with-logits training); `forward = sigmoid(logits)`. Output scores are **uncalibrated**.
 
+### 3.1 Model registry (`verifai/registry.py`)
+The server loads one **production default** at start-up (`VERIFAI_MODEL_PATH`; Model 4, falling back to v2). The registry also knows the **rollback** model (v2) and **candidates** (E4). `Engine.runtime(model_id)` returns the default bundle for requests that name no model; an optional model is loaded lazily, **at most one at a time** (the previous optional model is dropped, running jobs keep their own reference), so memory never holds more than two copies. All models share the same face detector, preprocessing, scoring and report code; only the checkpoint differs. The result's `model` block carries `registry_id`, `role` and `role_label`, and the dashboard shows a chip such as *E4 - Candidate - not approved for production*. Details: [E4_INTEGRATION.md](E4_INTEGRATION.md).
+
 ## 4. Image flow
 1. Upload (extension allow-list, size cap, random on-disk name) → 2. validation (decodable, ≥ 64 px, pixel cap, EXIF orientation, alpha composite) → 3. detect all faces (confidence ≥ 0.90, ≥ 32 px, ≤ 10 faces) → 4. crop with margin, JPEG-q95 round-trip, normalise → 5. batched inference → 6. per-face score → 7. **image score = max face score** → 8. classification: `FAKE` if score > 0.5, `REAL` otherwise, `INCONCLUSIVE` when no usable face or |score − 0.5| < 0.15 → 9. annotated image + per-face crop + Grad-CAM → 10. structured result, stored, uploaded file deleted.
 

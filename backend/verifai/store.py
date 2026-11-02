@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import os
 import shutil
 import threading
 import time
@@ -49,25 +50,52 @@ class AnalysisStore:
         return p
 
     # ---- job / result
+    @staticmethod
+    def _atomic_write(path: Path, text: str) -> None:
+        """Write via a temporary file and rename, so a concurrent reader (the browser polling /status while the worker saves progress)
+        never sees an empty or half-written file."""
+        tmp = path.with_name(path.name + ".tmp")
+        tmp.write_text(text, encoding="utf-8")
+        for attempt in range(40):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:           # Windows: the target is momentarily open in a reader; retry shortly
+                time.sleep(0.005 * (attempt + 1))
+        try:
+            path.write_text(text, encoding="utf-8")      # last resort: never lose a save
+        finally:
+            tmp.unlink(missing_ok=True)
+
+    @staticmethod
+    def _read_text(path: Path) -> str:
+        """Read a file that may be replaced at this very moment (Windows can briefly refuse to open it)."""
+        for attempt in range(40):
+            try:
+                return path.read_text(encoding="utf-8")
+            except PermissionError:
+                time.sleep(0.005 * (attempt + 1))
+        return path.read_text(encoding="utf-8")
+
     def save_job(self, job: JobState) -> None:
         d = self._dir(job.analysis_id); d.mkdir(parents=True, exist_ok=True)
         with self._lock:
-            (d / "job.json").write_text(job.model_dump_json(), encoding="utf-8")
+            self._atomic_write(d / "job.json", job.model_dump_json())
 
     def load_job(self, analysis_id: str) -> JobState:
         p = self._dir(analysis_id) / "job.json"
         if not p.is_file():
             raise NotFoundError("Unknown analysis id.")
-        return JobState.model_validate_json(p.read_text(encoding="utf-8"))
+        return JobState.model_validate_json(self._read_text(p))
 
     def save_result(self, result: AnalysisResult) -> None:
         d = self._dir(result.analysis_id); d.mkdir(parents=True, exist_ok=True)
         with self._lock:
-            (d / "result.json").write_text(result.model_dump_json(), encoding="utf-8")
+            self._atomic_write(d / "result.json", result.model_dump_json())
 
     def load_result(self, analysis_id: str) -> Optional[AnalysisResult]:
         p = self._dir(analysis_id) / "result.json"
-        return AnalysisResult.model_validate_json(p.read_text(encoding="utf-8")) if p.is_file() else None
+        return AnalysisResult.model_validate_json(self._read_text(p)) if p.is_file() else None
 
     def list_summaries(self, limit: int = 50) -> List[AnalysisSummary]:
         out: List[AnalysisSummary] = []

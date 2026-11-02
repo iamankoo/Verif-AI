@@ -18,7 +18,8 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     VERIFAI_FRONTEND_DIR=/app/frontend_dist \
     VERIFAI_STORAGE_DIR=/app/storage \
-    VERIFAI_MODEL_PATH=/app/models/verifai_v2_best.pth
+    VERIFAI_MODEL_PATH=/app/models/verifai_v2_best.pth \
+    VERIFAI_ENABLE_MODEL_SELECTION=false
 RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 curl \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 1000 verifai

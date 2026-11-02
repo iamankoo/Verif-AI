@@ -14,6 +14,28 @@ export interface ModelInfo {
   trained_on?: string | null;
   training_notes?: string | null;
   metrics_note?: string | null;
+  registry_id?: string | null;
+  role?: "production" | "rollback" | "candidate" | null;
+  role_label?: string | null;
+}
+
+export interface ModelOption {
+  id: string;
+  label: string;
+  role: "production" | "rollback" | "candidate";
+  role_label: string;
+  description: string;
+  checkpoint_file: string;
+  available: boolean;
+  selectable: boolean;
+  is_default: boolean;
+  loaded: boolean;
+}
+
+export interface ModelList {
+  default: string;
+  selection_enabled: boolean;
+  models: ModelOption[];
 }
 
 export interface Limits {

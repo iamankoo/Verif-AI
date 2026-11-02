@@ -11,7 +11,7 @@ vi.mock("../api", async (orig) => {
   return {
     ...real,
     api: {
-      health: vi.fn(), model: vi.fn(), list: vi.fn(), analyzeImage: vi.fn(), analyzeVideo: vi.fn(), status: vi.fn(), result: vi.fn(), remove: vi.fn(),
+      health: vi.fn(), model: vi.fn(), models: vi.fn(), list: vi.fn(), analyzeImage: vi.fn(), analyzeVideo: vi.fn(), status: vi.fn(), result: vi.fn(), remove: vi.fn(),
       reportUrl: (id: string) => `/api/analyses/${id}/report.pdf`, artifactUrl: (id: string, n: string) => `/api/analyses/${id}/artifacts/${n}`,
     },
   };
@@ -24,6 +24,7 @@ beforeEach(() => {
   m.health.mockResolvedValue({ status: "ok", model_loaded: true, device: "cpu", version: "1" });
   m.model.mockResolvedValue(MODEL);
   m.list.mockResolvedValue([]);
+  m.models.mockResolvedValue(undefined);          // servers without /models: no selector
 });
 
 const upload = async (name: string, type: string) => {
@@ -48,6 +49,52 @@ describe("Home", () => {
     await userEvent.click(screen.getByRole("button", { name: /analyse image/i }));
     await waitFor(() => expect(onOpen).toHaveBeenCalledWith(ID));
     expect(m.analyzeImage).toHaveBeenCalledTimes(1);
+  });
+
+  describe("model selection", () => {
+    const LIST = {
+      default: "model4", selection_enabled: true,
+      models: [
+        { id: "model4", label: "Model 4", role: "production", role_label: "Production default", description: "", checkpoint_file: "m4.pth", available: true, selectable: true, is_default: true, loaded: true },
+        { id: "v2", label: "v2", role: "rollback", role_label: "Rollback model", description: "", checkpoint_file: "v2.pth", available: true, selectable: true, is_default: false, loaded: false },
+        { id: "e4", label: "E4", role: "candidate", role_label: "Candidate - not approved for production", description: "", checkpoint_file: "e4.pth", available: true, selectable: true, is_default: false, loaded: false },
+      ],
+    };
+
+    it("shows no selector when the server offers only one model", async () => {
+      m.models.mockResolvedValue({ ...LIST, selection_enabled: false });
+      render(<Home onOpen={() => undefined} />);
+      await upload("face.png", "image/png");
+      expect(await screen.findByTestId("preview")).toBeInTheDocument();
+      expect(screen.queryByTestId("model-select")).not.toBeInTheDocument();
+    });
+
+    it("keeps the production default selected and sends no model id for it", async () => {
+      m.models.mockResolvedValue(LIST);
+      m.analyzeImage.mockResolvedValue(REAL_IMAGE);
+      render(<Home onOpen={() => undefined} />);
+      await upload("face.png", "image/png");
+      const sel = (await screen.findByTestId("model-select")) as HTMLSelectElement;
+      expect(sel.value).toBe("model4");
+      expect(screen.queryByTestId("candidate-note")).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole("button", { name: /analyse image/i }));
+      await waitFor(() => expect(m.analyzeImage).toHaveBeenCalledTimes(1));
+      expect(m.analyzeImage.mock.calls[0][2]).toBeUndefined();
+    });
+
+    it("labels the candidate, warns that it is not approved and sends its id", async () => {
+      m.models.mockResolvedValue(LIST);
+      m.analyzeImage.mockResolvedValue(REAL_IMAGE);
+      render(<Home onOpen={() => undefined} />);
+      await upload("face.png", "image/png");
+      const sel = await screen.findByTestId("model-select");
+      expect(sel).toHaveTextContent(/E4 - Candidate - not approved for production/);
+      await userEvent.selectOptions(sel, "e4");
+      expect(screen.getByTestId("candidate-note")).toHaveTextContent(/not approved for production/i);
+      await userEvent.click(screen.getByRole("button", { name: /analyse image/i }));
+      await waitFor(() => expect(m.analyzeImage).toHaveBeenCalledTimes(1));
+      expect(m.analyzeImage.mock.calls[0][2]).toBe("e4");
+    });
   });
 
   it("submits a video as a background job", async () => {

@@ -43,9 +43,20 @@ def default_model_path() -> Path:
     return BACKEND_DIR / "models" / "verifai_v2_best.pth"
 
 
+def default_rollback_path() -> Path:
+    return BACKEND_DIR / "models" / "verifai_v2_best.pth"          # production v2, kept unchanged
+
+
+def default_candidate_path() -> Path:
+    return BACKEND_DIR / "models" / "verifai_e4_candidate.pth"    # experiment E4: candidate only, not approved for production
+
+
 @dataclass(frozen=True)
 class Settings:
     model_path: Path = field(default_factory=default_model_path)
+    rollback_model_path: Path = field(default_factory=default_rollback_path)
+    candidate_model_path: Path = field(default_factory=default_candidate_path)
+    enable_model_selection: bool = True        # False on hosted deployments: only the default model is offered
     device: str = "auto"                      # auto | cpu | cuda | cuda:N
     storage_dir: Path = BACKEND_DIR / "storage"
     cors_origins: List[str] = field(default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"])
@@ -82,6 +93,9 @@ class Settings:
         fe = g("VERIFAI_FRONTEND_DIR", "")
         return Settings(
             model_path=Path(g("VERIFAI_MODEL_PATH", str(s.model_path))),
+            rollback_model_path=Path(g("VERIFAI_ROLLBACK_MODEL_PATH", str(s.rollback_model_path))),
+            candidate_model_path=Path(g("VERIFAI_CANDIDATE_MODEL_PATH", str(s.candidate_model_path))),
+            enable_model_selection=_b(g("VERIFAI_ENABLE_MODEL_SELECTION", s.enable_model_selection)),
             device=g("VERIFAI_DEVICE", s.device),
             storage_dir=Path(g("VERIFAI_STORAGE_DIR", str(s.storage_dir))),
             cors_origins=[o.strip() for o in g("VERIFAI_CORS_ORIGINS", ",".join(s.cors_origins)).split(",") if o.strip()],

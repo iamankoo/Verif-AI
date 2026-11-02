@@ -108,6 +108,11 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
               {result.processing_time_s != null && <li className="chip"><IconClock className="h-3.5 w-3.5" /> {result.processing_time_s.toFixed(2)} s</li>}
               <li className="chip"><IconCalendar className="h-3.5 w-3.5" /> {Number.isNaN(created.getTime()) ? "" : created.toLocaleString()}</li>
               <li className="chip">analysis {id.slice(0, 8)}</li>
+              {result.model?.role_label && (
+                <li className={result.model.role === "candidate" ? "chip border-amber-500/60 text-amber-300" : "chip"} data-testid="model-chip">
+                  Model: {result.model.registry_id ?? result.model.name} &middot; {result.model.role_label}
+                </li>
+              )}
             </ul>
             <div className="mt-3 max-w-xl"><VerdictBlurb value={cls} /></div>
           </div>
@@ -351,7 +356,7 @@ export function ResultView({ result, onNew, onDelete }: { result: AnalysisResult
               <ul className="list-disc space-y-1 pl-5 text-sm text-ink-soft">{LIMITATIONS.map((l, i) => <li key={i}>{l}</li>)}</ul>
               {result.model && (
                 <p className="mt-3 text-xs text-ink-mute">
-                  Model {result.model.name} v{result.model.version} &middot; checkpoint {result.model.checkpoint_file} (sha256 {result.model.checkpoint_sha256.slice(0, 12)}...) &middot; {result.model.device} &middot; threshold {result.model.decision_threshold}
+                  Model {result.model.name} v{result.model.version}{result.model.role_label ? ` (${result.model.role_label})` : ""} &middot; checkpoint {result.model.checkpoint_file} (sha256 {result.model.checkpoint_sha256.slice(0, 12)}...) &middot; {result.model.device} &middot; threshold {result.model.decision_threshold}
                 </p>
               )}
             </Section>
