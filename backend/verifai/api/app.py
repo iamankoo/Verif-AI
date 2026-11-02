@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, FastAPI, File, Request, UploadFile
+from fastapi import APIRouter, FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -125,22 +125,35 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                            "video_aggregation": settings.video_aggregation, "retention_hours": settings.result_ttl_hours},
                 "explainability": {"grad_cam_available": e.explainer.available and settings.enable_heatmaps}}
 
-    @api.post("/analyze/image", response_model=AnalysisResult, tags=["analysis"], responses={413: {"model": ErrorResponse}, 415: {"model": ErrorResponse}, 422: {"model": ErrorResponse}})
-    def analyze_image_endpoint(file: UploadFile = File(...)):
+    @api.get("/models", tags=["system"])
+    def list_models():
+        """Registered models and their roles. The default (production) model is used whenever a request does not name one."""
         e = eng()
+        return {"default": e.registry.default_id, "selection_enabled": settings.enable_model_selection,
+                "models": e.registry.describe(e.loaded_ids())}
+
+    @api.post("/analyze/image", response_model=AnalysisResult, tags=["analysis"], responses={413: {"model": ErrorResponse}, 415: {"model": ErrorResponse}, 422: {"model": ErrorResponse}})
+    def analyze_image_endpoint(file: UploadFile = File(...), model: Optional[str] = Form(None)):
+        e = eng()
+        e.runtime(model)                      # reject an unknown or unavailable model before the upload is stored
         display = os.path.basename(file.filename or "image")[:120]
         path = _save_upload(file, e.store.tmp, IMAGE_EXTENSIONS, int(settings.max_image_mb * 1e6), "image")
         try:
-            return e.run_image(path, display)
+            return e.run_image(path, display, model)
         finally:
             path.unlink(missing_ok=True)
 
     @api.post("/analyze/video", response_model=JobState, status_code=202, tags=["analysis"], responses={413: {"model": ErrorResponse}, 415: {"model": ErrorResponse}})
-    def analyze_video_endpoint(file: UploadFile = File(...)):
+    def analyze_video_endpoint(file: UploadFile = File(...), model: Optional[str] = Form(None)):
         e = eng()
+        e.runtime(model)
         display = os.path.basename(file.filename or "video")[:120]
         path = _save_upload(file, e.store.tmp, VIDEO_EXTENSIONS, int(settings.max_video_mb * 1e6), "video")
-        return e.submit_video(path, display)
+        try:
+            return e.submit_video(path, display, model)
+        except Exception:
+            path.unlink(missing_ok=True)
+            raise
 
     @api.get("/analyses", response_model=List[AnalysisSummary], tags=["analysis"])
     def list_analyses(limit: int = 50):

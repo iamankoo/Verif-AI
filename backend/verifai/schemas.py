@@ -49,6 +49,9 @@ class ModelInfo(BaseModel):
     trained_on: Optional[str] = None
     training_notes: Optional[str] = None
     metrics_note: Optional[str] = None
+    registry_id: Optional[str] = None            # model registry id (model4 / v2 / e4 / ...)
+    role: Optional[str] = None                   # production | rollback | candidate
+    role_label: Optional[str] = None
 
 
 class FaceResult(BaseModel):
