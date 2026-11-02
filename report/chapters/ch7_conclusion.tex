@@ -1,0 +1,45 @@
+\chapter{Conclusion and Future Scope}
+\label{ch:concl}
+
+\section{Conclusion and Future Perspectives}
+
+\subsection{Project Summary and Key Contributions}
+Verif-AI is a working system for face-based deepfake detection and forensic analysis. It locates faces with MTCNN, scores them with a two-stream
+network (an RGB EfficientNet-B0 and an EfficientNet-B0 that reads a fixed three-kernel SRM noise residual), explains the score with Grad-CAM heat-maps,
+summarises videos with face tracks, timelines and stored evidence frames, and produces a PDF forensic report. It is delivered as a tested FastAPI
+backend and a responsive React dashboard in which uploads are deleted immediately and results can be deleted by the user. Beyond the software, the
+project contributes an evaluation record that treats failures as results: the chance-level behaviour of the production model on genuine video was
+reproduced, traced to an image-quality shortcut and partly repaired; a per-quality-bin acceptance gate was designed and validated with synthetic
+controls; and an experiment with modern-generator data was run under a protocol and a promotion rule that were fixed before training.
+
+\subsection{Final Performance Assessment}
+The honest summary of the measured performance is the following. The production model v2 reaches accuracy 0.875 and ROC-AUC 0.941 on held-out identities
+of DeepFakeFace with generators seen in training, but only 0.746 and 0.849 on an unseen text-to-image generator, and it is at chance level (accuracy
+0.483) on held-out Celeb-DF video. The model with Celeb-DF data and quality augmentation (Model 4), the previous default and now an alternative, reaches 0.980 video accuracy on
+held-out Celeb-DF identities --- within-dataset evidence for one face-swap method --- but detects fewer DeepFakeFace fakes than v2. The E3 models detect held-out
+fakes of the modern generator families they were trained on almost perfectly, but this is not generator-disjoint evidence and the models (E3A, and the source-balanced E4) did not meet the
+pre-registered promotion rule. No result supports a claim of 95\% accuracy for modern AI-generated images or videos in general, and none supports a
+claim about AI-generated video.
+
+\subsection{Critical Reflections and Limitations}
+The central lesson is methodological. The prototype's very high reported accuracy could not be reproduced on identity-disjoint data, an
+unseen generator exposed a large drop, and a cue as simple as sharpness explained much of the apparent skill on the original dataset.
+Scores are not probabilities, Grad-CAM maps are explanations of a model and not proof, and the system depends on face detection and on the data it was
+trained on. The public demonstration runs on free hosting with a smaller, older model, without heat-maps and without persistent storage, and has no
+authentication or rate limiting; it is a demonstration, not a production service. Section~\ref{sec:limits} lists the limitations in detail.
+
+\subsection{Future Perspectives}
+\begin{itemize}
+\item \textbf{Independent evaluation data.} Assemble labelled test sets with \emph{generator-disjoint} and \emph{source-disjoint} splits, genuine
+phone and webcam photographs and video, and, if licences allow, labelled AI-generated video; only then can claims about modern generators be tested.
+\item \textbf{Shortcut-robust training.} Balance training data across quality bins and sources, supervise each stream separately, and report the per-bin
+gate for every candidate; the source-balanced E4 experiment (Section~\ref{sec:e4}) is a first step in this direction.
+\item \textbf{Calibration and uncertainty.} Calibrate scores on held-out data of the intended use and report calibrated uncertainty.
+\item \textbf{Stronger explanation.} Store heat-maps for every analysed frame together with their registered position so that a true overlay is possible for video.
+\item \textbf{Production hardening.} Authentication, rate limiting, persistent encrypted storage, monitoring and a hosting plan with enough memory for Grad-CAM and longer videos.
+\item \textbf{Broader inputs.} Audio-visual and temporal models for video, and analysis beyond faces, are outside the scope of this work.
+\end{itemize}
+
+\subsection{Closing Remarks}
+Verif-AI shows how a deepfake detector can be built as an inspectable, privacy-conscious tool and, more importantly, how its claims should be tested and bounded.
+A detector is only as trustworthy as the evidence about where it fails, and this report has tried to give that evidence the same weight as the architecture.

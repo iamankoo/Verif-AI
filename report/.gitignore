@@ -1,0 +1,12 @@
+# LaTeX build files and the packed archive are not committed
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+Verif-AI-report.zip

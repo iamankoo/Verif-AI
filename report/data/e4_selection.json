@@ -1,0 +1,846 @@
+{
+  "selected": "e4a_dffx4_modern_qa0.5",
+  "criterion": "max mean(ROC-AUC clean val, ROC-AUC degraded val) on the combined validation split",
+  "table": [
+    {
+      "run": "e4a_dffx4_modern_qa0.5",
+      "best_epoch": 12,
+      "val_select": 0.9797335369132283,
+      "val_none": {
+        "n": 4455,
+        "accuracy": 0.9542087542087542,
+        "roc_auc": 0.9896847893353893,
+        "false_positive_rate": 0.045965770171149146,
+        "false_negative_rate": 0.04564315352697095
+      },
+      "val_none_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.06966196745634079,
+          "real_acceptance_rate": 0.9397590361445783
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.8034992814064026,
+          "fake_detection_rate": 0.7931034482758621
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.8393151760101318,
+          "fake_detection_rate": 0.8275862068965517
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.954316258430481,
+          "fake_detection_rate": 0.9575757575757575
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.03960350900888443,
+          "fake_detection_rate": 0.030020703933747412
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.9373718500137329,
+          "fake_detection_rate": 0.9386892177589852
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.9970646500587463,
+          "fake_detection_rate": 0.9977272727272727
+        }
+      },
+      "test_internal_none": {
+        "n": 575,
+        "accuracy": 0.831304347826087,
+        "roc_auc": 0.9082966261677718,
+        "false_positive_rate": 0.13013698630136986,
+        "false_negative_rate": 0.20848056537102475
+      },
+      "test_internal_none_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.14180728793144226,
+          "real_acceptance_rate": 0.8698630136986302
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.789128839969635,
+          "fake_detection_rate": 0.7887323943661971
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7880244851112366,
+          "fake_detection_rate": 0.7943262411347518
+        }
+      },
+      "test_crossgen_none": {
+        "n": 568,
+        "accuracy": 0.6883802816901409,
+        "roc_auc": 0.7986285912681192,
+        "false_positive_rate": 0.1103202846975089,
+        "false_negative_rate": 0.5087108013937283
+      },
+      "test_crossgen_none_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.11516663432121277,
+          "real_acceptance_rate": 0.8896797153024911
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.4988718032836914,
+          "fake_detection_rate": 0.4912891986062718
+        }
+      },
+      "cdf_test_none": {
+        "n": 2348,
+        "accuracy": 0.9454855195911414,
+        "roc_auc": 0.9849058199756237,
+        "false_positive_rate": 0.060564349621472814,
+        "false_negative_rate": 0.0446927374301676
+      },
+      "cdf_test_none_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.06673132628202438,
+          "real_acceptance_rate": 0.9394356503785272
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.9478588104248047,
+          "fake_detection_rate": 0.9553072625698324
+        }
+      },
+      "modern_test_none": {
+        "n": 4326,
+        "accuracy": 0.9833564493758669,
+        "roc_auc": 0.9980345244847889,
+        "false_positive_rate": 0.022805805114029024,
+        "false_negative_rate": 0.013546370267453978
+      },
+      "modern_test_none_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.030203960835933685,
+          "fake_detection_rate": 0.022805805114029024
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.9408368468284607,
+          "fake_detection_rate": 0.948301329394387
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.9979028701782227,
+          "fake_detection_rate": 0.9981834695731153
+        }
+      },
+      "cdf_test_none_VIDEO": {
+        "n": 147,
+        "accuracy": 0.9795918367346939,
+        "roc_auc": 0.9988226059654631,
+        "false_positive_rate": 0.02197802197802198,
+        "false_negative_rate": 0.017857142857142856
+      },
+      "val_mixed": {
+        "n": 4455,
+        "accuracy": 0.9048260381593715,
+        "roc_auc": 0.9697821830392922,
+        "false_positive_rate": 0.1271393643031785,
+        "false_negative_rate": 0.06804979253112033
+      },
+      "val_mixed_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.10480967909097672,
+          "real_acceptance_rate": 0.9036144578313253
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.727029025554657,
+          "fake_detection_rate": 0.7413793103448276
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.7462368607521057,
+          "fake_detection_rate": 0.75
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.9182922840118408,
+          "fake_detection_rate": 0.9309090909090909
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.17912887036800385,
+          "fake_detection_rate": 0.16149068322981366
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.9253107905387878,
+          "fake_detection_rate": 0.9344608879492601
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.9678616523742676,
+          "fake_detection_rate": 0.9806818181818182
+        }
+      },
+      "test_internal_mixed": {
+        "n": 575,
+        "accuracy": 0.7721739130434783,
+        "roc_auc": 0.8588024589767173,
+        "false_positive_rate": 0.15753424657534246,
+        "false_negative_rate": 0.3003533568904594
+      },
+      "test_internal_mixed_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.1671486645936966,
+          "real_acceptance_rate": 0.8424657534246576
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.7302430272102356,
+          "fake_detection_rate": 0.7323943661971831
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.6893627643585205,
+          "fake_detection_rate": 0.6666666666666666
+        }
+      },
+      "test_crossgen_mixed": {
+        "n": 568,
+        "accuracy": 0.6373239436619719,
+        "roc_auc": 0.7389239525338823,
+        "false_positive_rate": 0.1708185053380783,
+        "false_negative_rate": 0.5505226480836237
+      },
+      "test_crossgen_mixed_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.17835916578769684,
+          "real_acceptance_rate": 0.8291814946619217
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.4550935924053192,
+          "fake_detection_rate": 0.44947735191637633
+        }
+      },
+      "cdf_test_mixed": {
+        "n": 2348,
+        "accuracy": 0.901618398637138,
+        "roc_auc": 0.9672601860146797,
+        "false_positive_rate": 0.11080523055746731,
+        "false_negative_rate": 0.0782122905027933
+      },
+      "cdf_test_mixed_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.1259305328130722,
+          "real_acceptance_rate": 0.8891947694425327
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.9146696329116821,
+          "fake_detection_rate": 0.9217877094972067
+        }
+      },
+      "modern_test_mixed": {
+        "n": 4326,
+        "accuracy": 0.9373555247341655,
+        "roc_auc": 0.984346048513255,
+        "false_positive_rate": 0.1375259156876296,
+        "false_negative_rate": 0.025008683570684264
+      },
+      "modern_test_mixed_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.16409075260162354,
+          "fake_detection_rate": 0.1375259156876296
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.9374552965164185,
+          "fake_detection_rate": 0.946824224519941
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.9728520512580872,
+          "fake_detection_rate": 0.9836512261580381
+        }
+      },
+      "cdf_test_mixed_VIDEO": {
+        "n": 147,
+        "accuracy": 0.9659863945578231,
+        "roc_auc": 0.9960753532182104,
+        "false_positive_rate": 0.03296703296703297,
+        "false_negative_rate": 0.03571428571428571
+      }
+    },
+    {
+      "run": "model4",
+      "val_none": {
+        "n": 4455,
+        "accuracy": 0.654320987654321,
+        "roc_auc": 0.7134596069758241,
+        "false_positive_rate": 0.06601466992665037,
+        "false_negative_rate": 0.58298755186722
+      },
+      "val_none_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.05778217688202858,
+          "real_acceptance_rate": 0.9443929564411492
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.7671602368354797,
+          "fake_detection_rate": 0.75
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.7872939705848694,
+          "fake_detection_rate": 0.7931034482758621
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.9458023905754089,
+          "fake_detection_rate": 0.9551515151515152
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.08594880998134613,
+          "fake_detection_rate": 0.07763975155279502
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.04646022990345955,
+          "fake_detection_rate": 0.035940803382663845
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.030714234337210655,
+          "fake_detection_rate": 0.023863636363636365
+        }
+      },
+      "test_internal_none": {
+        "n": 575,
+        "accuracy": 0.8347826086956521,
+        "roc_auc": 0.9206762185972216,
+        "false_positive_rate": 0.13013698630136986,
+        "false_negative_rate": 0.20141342756183744
+      },
+      "test_internal_none_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.1293146014213562,
+          "real_acceptance_rate": 0.8698630136986302
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.7928395867347717,
+          "fake_detection_rate": 0.8098591549295775
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7757419943809509,
+          "fake_detection_rate": 0.7872340425531915
+        }
+      },
+      "test_crossgen_none": {
+        "n": 568,
+        "accuracy": 0.6267605633802817,
+        "roc_auc": 0.7953798653390702,
+        "false_positive_rate": 0.10676156583629894,
+        "false_negative_rate": 0.6341463414634146
+      },
+      "test_crossgen_none_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.11373409628868103,
+          "real_acceptance_rate": 0.8932384341637011
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.382329523563385,
+          "fake_detection_rate": 0.36585365853658536
+        }
+      },
+      "cdf_test_none": {
+        "n": 2348,
+        "accuracy": 0.9531516183986372,
+        "roc_auc": 0.9879182735007901,
+        "false_positive_rate": 0.03785271851342051,
+        "false_negative_rate": 0.061452513966480445
+      },
+      "cdf_test_none_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.045211371034383774,
+          "real_acceptance_rate": 0.9621472814865795
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.932388186454773,
+          "fake_detection_rate": 0.9385474860335196
+        }
+      },
+      "modern_test_none": {
+        "n": 4326,
+        "accuracy": 0.32801664355062415,
+        "roc_auc": 0.4135943309425809,
+        "false_positive_rate": 0.08154803040774015,
+        "false_negative_rate": 0.9687391455366446
+      },
+      "modern_test_none_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.09020387381315231,
+          "fake_detection_rate": 0.08154803040774015
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.05394870415329933,
+          "fake_detection_rate": 0.03840472673559823
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.035921089351177216,
+          "fake_detection_rate": 0.029064486830154404
+        }
+      },
+      "cdf_test_none_VIDEO": {
+        "n": 147,
+        "accuracy": 0.9795918367346939,
+        "roc_auc": 0.9984301412872841,
+        "false_positive_rate": 0.01098901098901099,
+        "false_negative_rate": 0.03571428571428571
+      },
+      "val_mixed": {
+        "n": 4455,
+        "accuracy": 0.6388327721661055,
+        "roc_auc": 0.703307226409926,
+        "false_positive_rate": 0.10660146699266504,
+        "false_negative_rate": 0.5771784232365145
+      },
+      "val_mixed_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.09162181615829468,
+          "real_acceptance_rate": 0.9230769230769231
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.6937158107757568,
+          "fake_detection_rate": 0.6982758620689655
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.7221685647964478,
+          "fake_detection_rate": 0.7586206896551724
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.9066082239151001,
+          "fake_detection_rate": 0.9151515151515152
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.16097265481948853,
+          "fake_detection_rate": 0.13975155279503104
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.08383561670780182,
+          "fake_detection_rate": 0.07188160676532769
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.08949490636587143,
+          "fake_detection_rate": 0.06931818181818182
+        }
+      },
+      "test_internal_mixed": {
+        "n": 575,
+        "accuracy": 0.7860869565217391,
+        "roc_auc": 0.8621545089307323,
+        "false_positive_rate": 0.17123287671232876,
+        "false_negative_rate": 0.2579505300353357
+      },
+      "test_internal_mixed_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.19088400900363922,
+          "real_acceptance_rate": 0.8287671232876712
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.7316216230392456,
+          "fake_detection_rate": 0.7676056338028169
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7024221420288086,
+          "fake_detection_rate": 0.7163120567375887
+        }
+      },
+      "test_crossgen_mixed": {
+        "n": 568,
+        "accuracy": 0.6197183098591549,
+        "roc_auc": 0.7208451647302442,
+        "false_positive_rate": 0.15302491103202848,
+        "false_negative_rate": 0.6027874564459931
+      },
+      "test_crossgen_mixed_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.17074942588806152,
+          "real_acceptance_rate": 0.8469750889679716
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.3959820568561554,
+          "fake_detection_rate": 0.397212543554007
+        }
+      },
+      "cdf_test_mixed": {
+        "n": 2348,
+        "accuracy": 0.9335604770017035,
+        "roc_auc": 0.9786363793653661,
+        "false_positive_rate": 0.055746730901582935,
+        "false_negative_rate": 0.08379888268156424
+      },
+      "cdf_test_mixed_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.07389474660158157,
+          "real_acceptance_rate": 0.9442532690984171
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.9018464684486389,
+          "fake_detection_rate": 0.9162011173184358
+        }
+      },
+      "modern_test_mixed": {
+        "n": 4326,
+        "accuracy": 0.3432732316227462,
+        "roc_auc": 0.4314385586064808,
+        "false_positive_rate": 0.14236351071181755,
+        "false_negative_rate": 0.91524835012157
+      },
+      "modern_test_mixed_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.16057626903057098,
+          "fake_detection_rate": 0.14236351071181755
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.0967383086681366,
+          "fake_detection_rate": 0.07976366322008863
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.10417814552783966,
+          "fake_detection_rate": 0.08628519527702089
+        }
+      },
+      "cdf_test_mixed_VIDEO": {
+        "n": 147,
+        "accuracy": 0.9727891156462585,
+        "roc_auc": 0.993524332810047,
+        "false_positive_rate": 0.01098901098901099,
+        "false_negative_rate": 0.05357142857142857
+      }
+    },
+    {
+      "run": "v2",
+      "val_none": {
+        "n": 4455,
+        "accuracy": 0.48866442199775534,
+        "roc_auc": 0.48418103054712935,
+        "false_positive_rate": 0.3188264058679707,
+        "false_negative_rate": 0.674688796680498
+      },
+      "val_none_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.5234090089797974,
+          "real_acceptance_rate": 0.458758109360519
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.8952484130859375,
+          "fake_detection_rate": 0.9137931034482759
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.8976870775222778,
+          "fake_detection_rate": 0.9310344827586207
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.6121151447296143,
+          "fake_detection_rate": 0.6363636363636364
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.09991167485713959,
+          "fake_detection_rate": 0.07039337474120083
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.056117117404937744,
+          "fake_detection_rate": 0.042283298097251586
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.046205148100852966,
+          "fake_detection_rate": 0.028409090909090908
+        }
+      },
+      "test_internal_none": {
+        "n": 575,
+        "accuracy": 0.8747826086956522,
+        "roc_auc": 0.9409700372718912,
+        "false_positive_rate": 0.1404109589041096,
+        "false_negative_rate": 0.10954063604240283
+      },
+      "test_internal_none_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.17038719356060028,
+          "real_acceptance_rate": 0.8595890410958904
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.8583393096923828,
+          "fake_detection_rate": 0.8661971830985915
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.9042722582817078,
+          "fake_detection_rate": 0.9148936170212766
+        }
+      },
+      "test_crossgen_none": {
+        "n": 568,
+        "accuracy": 0.7464788732394366,
+        "roc_auc": 0.8492318375141047,
+        "false_positive_rate": 0.14590747330960854,
+        "false_negative_rate": 0.3588850174216028
+      },
+      "test_crossgen_none_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.15906016528606415,
+          "real_acceptance_rate": 0.8540925266903915
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.6216014623641968,
+          "fake_detection_rate": 0.6411149825783972
+        }
+      },
+      "cdf_test_none": {
+        "n": 2348,
+        "accuracy": 0.47103918228279384,
+        "roc_auc": 0.4794088132048122,
+        "false_positive_rate": 0.5932553337921541,
+        "false_negative_rate": 0.4245810055865922
+      },
+      "cdf_test_none_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.5845739841461182,
+          "real_acceptance_rate": 0.40674466620784583
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.5680360198020935,
+          "fake_detection_rate": 0.5754189944134078
+        }
+      },
+      "modern_test_none": {
+        "n": 4326,
+        "accuracy": 0.3257050392972723,
+        "roc_auc": 0.39806304164297235,
+        "false_positive_rate": 0.08984105044920525,
+        "false_negative_rate": 0.9680444598819035
+      },
+      "modern_test_none_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.10974102467298508,
+          "fake_detection_rate": 0.08984105044920525
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.06933435797691345,
+          "fake_detection_rate": 0.04431314623338257
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.04411647841334343,
+          "fake_detection_rate": 0.02815622161671208
+        }
+      },
+      "cdf_test_none_VIDEO": {
+        "n": 147,
+        "accuracy": 0.47619047619047616,
+        "roc_auc": 0.4793956043956044,
+        "false_positive_rate": 0.6043956043956044,
+        "false_negative_rate": 0.39285714285714285
+      },
+      "val_mixed": {
+        "n": 4455,
+        "accuracy": 0.47048260381593715,
+        "roc_auc": 0.4833362416175472,
+        "false_positive_rate": 0.4889975550122249,
+        "false_negative_rate": 0.5639004149377593
+      },
+      "val_mixed_per_generator": {
+        "real": {
+          "n": 1079,
+          "mean_score": 0.5225247740745544,
+          "real_acceptance_rate": 0.432808155699722
+        },
+        "inpainting": {
+          "n": 116,
+          "mean_score": 0.7496568560600281,
+          "fake_detection_rate": 0.7931034482758621
+        },
+        "insight": {
+          "n": 116,
+          "mean_score": 0.7458916306495667,
+          "fake_detection_rate": 0.7758620689655172
+        },
+        "celebdf_synthesis": {
+          "n": 825,
+          "mean_score": 0.5322508215904236,
+          "fake_detection_rate": 0.5466666666666666
+        },
+        "real_ffhq": {
+          "n": 966,
+          "mean_score": 0.39611026644706726,
+          "fake_detection_rate": 0.40165631469979296
+        },
+        "sfhq": {
+          "n": 473,
+          "mean_score": 0.3387009799480438,
+          "fake_detection_rate": 0.3298097251585624
+        },
+        "deepdetect_fake": {
+          "n": 880,
+          "mean_score": 0.31895217299461365,
+          "fake_detection_rate": 0.29772727272727273
+        }
+      },
+      "test_internal_mixed": {
+        "n": 575,
+        "accuracy": 0.6765217391304348,
+        "roc_auc": 0.7852751827290769,
+        "false_positive_rate": 0.4486301369863014,
+        "false_negative_rate": 0.19434628975265017
+      },
+      "test_internal_mixed_per_generator": {
+        "real": {
+          "n": 292,
+          "mean_score": 0.43577584624290466,
+          "real_acceptance_rate": 0.5513698630136986
+        },
+        "insight": {
+          "n": 142,
+          "mean_score": 0.783009946346283,
+          "fake_detection_rate": 0.8028169014084507
+        },
+        "inpainting": {
+          "n": 141,
+          "mean_score": 0.7890411019325256,
+          "fake_detection_rate": 0.8085106382978723
+        }
+      },
+      "test_crossgen_mixed": {
+        "n": 568,
+        "accuracy": 0.6443661971830986,
+        "roc_auc": 0.7087678400932459,
+        "false_positive_rate": 0.4234875444839858,
+        "false_negative_rate": 0.289198606271777
+      },
+      "test_crossgen_mixed_per_generator": {
+        "real": {
+          "n": 281,
+          "mean_score": 0.4133293628692627,
+          "real_acceptance_rate": 0.5765124555160143
+        },
+        "text2img": {
+          "n": 287,
+          "mean_score": 0.6833946704864502,
+          "fake_detection_rate": 0.710801393728223
+        }
+      },
+      "cdf_test_mixed": {
+        "n": 2348,
+        "accuracy": 0.46976149914821125,
+        "roc_auc": 0.4601737111043612,
+        "false_positive_rate": 0.578114246386786,
+        "false_negative_rate": 0.45251396648044695
+      },
+      "cdf_test_mixed_per_generator": {
+        "real": {
+          "n": 1453,
+          "mean_score": 0.5556692481040955,
+          "real_acceptance_rate": 0.42188575361321407
+        },
+        "celebdf_synthesis": {
+          "n": 895,
+          "mean_score": 0.5186933279037476,
+          "fake_detection_rate": 0.547486033519553
+        }
+      },
+      "modern_test_mixed": {
+        "n": 4326,
+        "accuracy": 0.41423948220064727,
+        "roc_auc": 0.4585928702783759,
+        "false_positive_rate": 0.3973738769868694,
+        "false_negative_rate": 0.6804445988190344
+      },
+      "modern_test_mixed_per_generator": {
+        "real_ffhq": {
+          "n": 1447,
+          "mean_score": 0.39216408133506775,
+          "fake_detection_rate": 0.3973738769868694
+        },
+        "sfhq": {
+          "n": 677,
+          "mean_score": 0.34814363718032837,
+          "fake_detection_rate": 0.3397341211225997
+        },
+        "deepdetect_fake": {
+          "n": 2202,
+          "mean_score": 0.32850223779678345,
+          "fake_detection_rate": 0.3133514986376022
+        }
+      },
+      "cdf_test_mixed_VIDEO": {
+        "n": 147,
+        "accuracy": 0.3877551020408163,
+        "roc_auc": 0.42091836734693877,
+        "false_positive_rate": 0.7252747252747253,
+        "false_negative_rate": 0.42857142857142855
+      }
+    }
+  ],
+  "env": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda_available": true,
+    "gpu": "Tesla T4",
+    "cuda": "12.8"
+  }
+}

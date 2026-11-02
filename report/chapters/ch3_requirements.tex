@@ -1,0 +1,215 @@
+\chapter{Requirement Engineering}
+\label{ch:req}
+
+\section{Requirement Engineering and Design}
+The transition from a research prototype to a usable forensic tool requires explicit requirements. They were derived from three sources:
+the weaknesses found when the earlier prototype was evaluated, the needs of a reviewer who must trust and audit a result, and the
+constraints of free hardware and open datasets. This chapter states them and the resulting technology choices.
+
+\subsection{Project Feasibility Analysis}
+\textbf{Technical feasibility.} Two EfficientNet-B0 networks (about 12 million parameters together) run on a CPU: a single image is
+analysed in roughly 0.5--2.5 seconds on the development laptop, and a video of a few seconds in several seconds (measured values from the
+analysis records). Training needs a GPU, which was obtained from the free Kaggle Tesla T4 allowance; one training run takes between about
+one and several hours depending on the amount of data.
+
+\textbf{Operational feasibility.} The system is delivered as a Docker image or as two parts (static React build and a Python API), uses no
+external AI service or API key, and needs no account for the end user.
+
+\textbf{Economic feasibility.} All software is open source, and training and hosting used free tiers. The free hosting tier limits what the
+public demonstration can do (Section~\ref{sec:deploy-impl}); a plan with more memory would be required for the full feature set.
+
+\textbf{Legal and ethical feasibility.} Face data are personal data. The system deletes uploads right after analysis, avoids a public list
+of other users' analyses, and was developed with datasets whose terms were reviewed (Appendix~\ref{app:datasets}). Datasets with research-only
+terms are used for non-commercial study only.
+
+\textbf{Main risks.} (i) Over-optimistic evaluation because of leakage or shortcuts; (ii) a detector that fails on genuine video or on new
+generators; (iii) over-interpretation of scores or heat-maps by users. They are addressed by the evaluation design of
+Chapter~\ref{ch:results} and by the wording of the user interface.
+
+\subsection{Requirements Analysis}
+\textbf{Stakeholders.} (1) A \emph{reviewer} who uploads media and needs a verdict with inspectable evidence; (2) a \emph{student or researcher}
+who wants a reproducible detector for experiments; (3) an \emph{operator} who deploys and maintains the service.
+
+\begin{table}[ht]
+\centering
+\caption{Functional requirements (FR) of Verif-AI.}
+\label{tab:fr}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{1.0cm}|p{8.6cm}|p{2.3cm}|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Status} \\ \hline
+FR-1 & Accept an image or a video through one upload control; detect the media type automatically; reject unsupported or oversized files with a clear message. & Implemented \\ \hline
+FR-2 & Detect faces with a published detector and analyse every sufficiently large and confident face (up to 10 per image). & Implemented \\ \hline
+FR-3 & Score each face with the two-stream model and return a raw fake score in $[0,1]$ together with a REAL / FAKE / INCONCLUSIVE label. & Implemented \\ \hline
+FR-4 & Report ``no usable face'' as INCONCLUSIVE rather than as real or fake. & Implemented \\ \hline
+FR-5 & Provide Grad-CAM heat-maps for faces and for evidence frames; show original, heat-map and overlay views. & Implemented (when the host allows) \\ \hline
+FR-6 & For video: sample frames, track faces, aggregate per track, list suspicious time ranges and store the highest-scoring frames as evidence. & Implemented \\ \hline
+FR-7 & Show the frame-level score timeline and let the user select a frame and see its stored image and heat-map. & Implemented \\ \hline
+FR-8 & Generate a PDF forensic report with the verdict, scores, file hash, model checkpoint hash, evidence and limitations. & Implemented \\ \hline
+FR-9 & Run video analysis as a background job with progress reporting. & Implemented \\ \hline
+FR-10 & Let the user view earlier analyses and delete a result at any time; delete uploads immediately after analysis; expire results automatically. & Implemented \\ \hline
+FR-11 & Expose model information (name, architecture, checkpoint hash, thresholds, limits) through the API and the interface. & Implemented \\ \hline
+FR-12 & Provide documented REST endpoints with typed error responses and a health check. & Implemented \\ \hline
+FR-13 & Detect modern text-to-image and diffusion-edited faces and AI-generated video reliably. & \textbf{Not achieved} (see Chapter~\ref{ch:results}) \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Non-functional requirements (NFR) and how each was addressed or measured.}
+\label{tab:nfr}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{2.4cm}|p{5.0cm}|p{4.6cm}|}
+\hline
+\textbf{Category} & \textbf{Requirement} & \textbf{Measure / mechanism} \\ \hline
+Performance & An image is analysed within a few seconds on a CPU; video does not block the browser. & Measured 0.5--2.5\,s per image on the development laptop; video runs as a polled background job. \\ \hline
+Resource use & Run on a modest machine. & Measured on the laptop: about 490\,MB after the model loads, about 780\,MB peak for one image with Grad-CAM, over 820\,MB while analysing a video. \\ \hline
+Privacy & Do not retain uploads or expose other users' analyses. & Uploads deleted right after analysis; results expire (72\,h default); the global history list can be disabled; results are reachable only by a 128-bit random identifier. \\ \hline
+Security & Resist malformed and malicious uploads. & Extension allow-list, size and pixel limits, decoding check, server-chosen file names, CORS restricted to configured origins. \\ \hline
+Honesty & Never present a score as a probability or a heat-map as proof. & Fixed wording in the interface and report; INCONCLUSIVE band; limitation text on every result. \\ \hline
+Reproducibility & The result must be traceable to a model and an input. & File SHA-256 and checkpoint SHA-256 stored in every result and report. \\ \hline
+Portability & Run on Windows, Linux and in a container. & Docker image; CPU and CUDA paths; environment-variable configuration. \\ \hline
+Maintainability & Changes must be verifiable. & Automated tests: 152 backend tests passed (7 environment-gated skips), 63 frontend unit tests and 9 browser end-to-end tests at the time of writing. \\ \hline
+Usability & Work on desktop, tablet and phone. & Responsive layout verified at 1440, 1024, 768, 390 and 320\,px widths. \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Proposed System Architecture}
+The system is organised in three tiers (Figure~\ref{fig:dfd}): a browser dashboard, an HTTP API, and the analysis core. The
+data-flow diagram follows a single request from upload to result. Detailed designs of the model and the pipelines are in
+Chapter~\ref{ch:design}.
+
+\begin{figure}[ht]
+\centering
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tikzpicture}[font=\footnotesize,
+  ext/.style={draw,rectangle,minimum width=1.9cm,minimum height=0.8cm,align=center,fill=black!6},
+  proc/.style={draw,rounded corners=3pt,minimum width=2.3cm,minimum height=0.9cm,align=center,fill=navy!7},
+  store/.style={draw,minimum width=2.3cm,minimum height=0.7cm,align=center,fill=accent!10,
+     path picture={\draw[black!60] ([xshift=0.25cm]path picture bounding box.north west)--([xshift=0.25cm]path picture bounding box.south west);}},
+  arr/.style={-{Stealth[length=1.8mm]},thick}]
+\node[ext] (user) at (0,0) {User\\(browser)};
+\node[proc] (api) at (4.0,0) {1. Validate and\\receive upload};
+\node[proc] (face) at (8.3,0) {2. Detect faces\\(MTCNN)};
+\node[proc] (net) at (8.3,-2.3) {3. Score faces\\(two-stream net)};
+\node[proc] (agg) at (4.0,-2.3) {4. Aggregate\\(image / video)};
+\node[proc] (ev) at (4.0,-4.6) {5. Evidence:\\Grad-CAM, frames};
+\node[store] (res) at (8.3,-4.6) {D1 Results and\\evidence images};
+\node[proc] (pdf) at (0,-4.6) {6. PDF report};
+\draw[arr] (user)--node[above,font=\scriptsize]{media file}(api);
+\draw[arr] (api)--node[above,font=\scriptsize]{decoded media}(face);
+\draw[arr] (face)--node[right,font=\scriptsize]{face crops}(net);
+\draw[arr] (net)--node[above,font=\scriptsize]{fake scores}(agg);
+\draw[arr] (agg)--node[right,font=\scriptsize]{selected faces/frames}(ev);
+\draw[arr] (ev)--node[above,font=\scriptsize]{artifacts}(res);
+\draw[arr] (agg.west)--++(-1.0,0)|-(user.south east);
+\node[font=\scriptsize,align=center,fill=white,inner sep=1pt] at (1.2,-2.3) {verdict,\\scores};
+\draw[arr] (res.south)--++(0,-0.6)-|(pdf.south);
+\node[font=\scriptsize,fill=white,inner sep=1pt] at (4.0,-5.2) {read};
+\draw[arr] (pdf)--(user);
+\node[font=\scriptsize,fill=white,inner sep=1pt,xshift=0.35cm] at (0,-2.3) {PDF};
+\draw[arr,dashed] (api.south west)--++(-0.3,-0.3)node[left,font=\scriptsize,align=center]{upload\\deleted};
+\end{tikzpicture}
+\end{adjustbox}
+\caption[Data-flow diagram of Verif-AI. Processes 1--6 run in the API process; D1 is the results store (evidence images and JSON), which is deleted on request or after the retention period]{Data-flow diagram of Verif-AI. Processes 1--6 run in the API process; D1 is the results store (evidence images and JSON), which is
+deleted on request or after the retention period. The original upload is deleted as soon as processing 4 finishes.}
+\label{fig:dfd}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tikzpicture}[font=\footnotesize,
+  uc/.style={draw,ellipse,minimum width=3.6cm,minimum height=0.75cm,align=center,fill=navy!6},
+  act/.style={draw,rectangle,minimum width=1.6cm,minimum height=0.8cm,align=center,fill=black!6}]
+\draw[rounded corners=4pt,dashed] (2.6,-5.6) rectangle (10.4,1.0);
+\node[font=\scriptsize\bfseries] at (6.5,0.75) {Verif-AI system};
+\node[act] (rev) at (0.5,-2.0) {Reviewer};
+\node[act] (op) at (12.2,-2.0) {Operator};
+\node[uc] (u1) at (6.5,0.1) {Upload image or video};
+\node[uc] (u2) at (6.5,-0.9) {View verdict and scores};
+\node[uc] (u3) at (6.5,-1.9) {Inspect heat-map and overlay};
+\node[uc] (u4) at (6.5,-2.9) {Browse video timeline and frames};
+\node[uc] (u5) at (6.5,-3.9) {Download PDF report};
+\node[uc] (u6) at (6.5,-4.9) {Delete analysis};
+\foreach \u in {u1,u2,u3,u4,u5,u6}{\draw (rev)--(\u.west);}
+\node[draw=none,font=\scriptsize,align=center] at (12.2,-3.2) {configures, deploys,\\monitors};
+\draw[dashed] (op)--(10.4,-2.0);
+\end{tikzpicture}
+\end{adjustbox}
+\caption[Use-case diagram. The reviewer interacts with six use cases; the operator configures and]{Use-case diagram. The reviewer interacts with six use cases; the operator configures and deploys the service (environment
+variables, hosting) but does not see uploaded content.}
+\label{fig:usecase}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Main use cases.}
+\label{tab:usecases}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{2.6cm}|p{9.3cm}|}
+\hline
+\textbf{Use case} & \textbf{Flow} \\ \hline
+Analyse an image & The user selects an image; the dashboard previews it and sends it to the image endpoint; the API validates and decodes it, detects faces, scores them, generates heat-maps, deletes the upload and returns the result; the dashboard opens the result page. \\ \hline
+Analyse a video & The user selects a video; the API stores it temporarily, starts a background job and answers immediately with an identifier; the dashboard polls the job status and opens the result when it is complete; frames, tracks and evidence are stored. \\ \hline
+Inspect evidence & On the result page the user switches between original, heat-map and overlay views, selects a face, or selects a frame on the timeline; where no heat-map was stored the interface states this explicitly. \\ \hline
+Delete & The user deletes the analysis; the results folder is removed and the history entry disappears. \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Hardware and Software Requirements}
+\begin{table}[ht]
+\centering
+\caption{Hardware and software requirements.}
+\label{tab:hwsw}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{3.0cm}|p{8.8cm}|}
+\hline
+\textbf{Item} & \textbf{Requirement} \\ \hline
+Runtime CPU / RAM & Any modern x86-64 CPU; at least 2\,GB RAM recommended (about 0.8\,GB peak was measured for one analysis with Grad-CAM). \\ \hline
+GPU & Optional for inference (CUDA is used automatically); required only for training (Kaggle Tesla T4 used). \\ \hline
+Storage & About 50\,MB per checkpoint; evidence images of an analysis are small JPEG files. \\ \hline
+Operating system & Windows 11 (development), Linux (Docker image based on Python 3.10, Kaggle notebooks on Python 3.13). \\ \hline
+Backend & Python 3, PyTorch, FastAPI, OpenCV, Pillow, ReportLab (see Table~\ref{tab:stack}). \\ \hline
+Frontend & A current Chromium-, Firefox- or Safari-class browser; Node.js 22 to build. \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Development Technology Stack}
+\begin{table}[ht]
+\centering
+\caption{System technology stack and development environment.}
+\label{tab:stack}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{2.6cm}|p{3.4cm}|p{5.8cm}|}
+\hline
+\textbf{Category} & \textbf{Tool / library} & \textbf{Purpose} \\ \hline
+Deep learning & PyTorch \citep{paszke2019pytorch} & Tensors, autograd, model definition and training \\ \hline
+Backbone & efficientnet-pytorch 0.7.1 & EfficientNet-B0 feature extractor \citep{tan2019efficientnet} \\ \hline
+Face detection & facenet-pytorch (MTCNN) & Face boxes and confidences \citep{zhang2016mtcnn} \\ \hline
+Explainability & grad-cam package & Grad-CAM heat-maps \citep{selvaraju2017gradcam} \\ \hline
+Image / video & OpenCV (headless), Pillow & Decoding, resizing, JPEG round-trip, sampling \\ \hline
+API & FastAPI, Uvicorn, Pydantic v2 & REST endpoints, validation, background jobs \\ \hline
+Reports & ReportLab & PDF forensic report \\ \hline
+Frontend & React 18, TypeScript 5, Vite 5, Tailwind CSS 3 & Dashboard and result viewers \\ \hline
+Testing & pytest, Vitest, Testing Library, Playwright & Unit, component and browser end-to-end tests \\ \hline
+Training & Kaggle notebooks (Tesla T4), AdamW \citep{loshchilov2019adamw} & Model training and evaluation \\ \hline
+Delivery & Docker, Vercel, Render & Container image, static frontend hosting, API hosting \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Constraints and Assumptions}
+The detector sees a single cropped face at $224\times224$ pixels; it has no information about audio, context or provenance. Training data
+are limited to the datasets listed in Table~\ref{tab:datasets}, whose licences permit non-commercial research. Free hosting tiers have no
+persistent disk and limited memory, so the public demonstration is reduced in capability. Video evaluation was possible only on
+Celeb-DF, which contains one face-swap method.

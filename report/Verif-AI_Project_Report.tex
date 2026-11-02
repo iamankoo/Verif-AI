@@ -1,0 +1,228 @@
+% ============================================================================
+%  VERIF-AI: A Deep Learning-Based Framework for Face-Based Deepfake Detection and Forensic Analysis
+%  Project report (B.Tech, CSE - AI & DS, IIIT Senapati, Manipur).  Compile: latexmk -pdf Verif-AI_Project_Report.tex
+%  Layout follows the department's reference report (A4, report class, grid tables with captions above, figure captions below,
+%  numbered algorithms and listings, IEEE-style bibliography). Every figure, number and citation is traceable to the project repository.
+% ============================================================================
+\documentclass[11pt,a4paper]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tgschola}% Century Schoolbook family, as in the reference report
+\makeatletter
+% small caps are not provided by Schola: imitate them the way the reference does (capital at full size, rest at 80 %)
+\newcommand{\fsc}[2]{#1{\fontsize{\fpeval{0.8*\f@size}}{0}\selectfont #2}}
+\makeatother
+
+% ---- type sizes measured from the reference (internship) report: 11pt class scaled by 0.9265 (body 10.145 pt, leading 13.6 pt) ----
+\makeatletter
+\renewcommand\normalsize{\@setfontsize\normalsize{10.18}{12.0}%
+  \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@ \abovedisplayshortskip \z@ \@plus3\p@
+  \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+  \belowdisplayskip \abovedisplayskip
+  \let\@listi\@listI}
+\renewcommand\small{\@setfontsize\small{9.30}{11}%
+  \abovedisplayskip 8.5\p@ \@plus3\p@ \@minus4\p@ \abovedisplayshortskip \z@ \@plus2\p@
+  \belowdisplayshortskip 4\p@ \@plus2\p@ \@minus2\p@ \def\@listi{\leftmargin\leftmargini \topsep 4\p@ \@plus2\p@ \@minus2\p@ \parsep 2\p@ \@plus\p@ \@minus\p@ \itemsep \parsep}%
+  \belowdisplayskip \abovedisplayskip}
+\renewcommand\footnotesize{\@setfontsize\footnotesize{8.37}{10}%
+  \abovedisplayskip 6\p@ \@plus2\p@ \@minus4\p@ \abovedisplayshortskip \z@ \@plus\p@
+  \belowdisplayshortskip 3\p@ \@plus\p@ \@minus2\p@ \def\@listi{\leftmargin\leftmargini \topsep 3\p@ \@plus\p@ \@minus\p@ \parsep 2\p@ \@plus\p@ \@minus\p@ \itemsep \parsep}%
+  \belowdisplayskip \abovedisplayskip}
+\renewcommand\scriptsize{\@setfontsize\scriptsize{7.44}{9.5}}
+\renewcommand\tiny{\@setfontsize\tiny{5.58}{6}}
+\renewcommand\large{\@setfontsize\large{11.16}{14}}
+\renewcommand\Large{\@setfontsize\Large{13.39}{18}}
+\renewcommand\LARGE{\@setfontsize\LARGE{16.07}{22}}
+\renewcommand\huge{\@setfontsize\huge{19.27}{25}}
+\renewcommand\Huge{\@setfontsize\Huge{23.13}{30}}
+\makeatother
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,nohead,left=96pt,right=96pt,top=92pt,bottom=96pt,footskip=13pt]{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{needspace}
+\usepackage{xcolor}
+\usepackage{array,tabularx,multirow,booktabs,longtable}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,calc,backgrounds,decorations.pathreplacing,patterns}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks,pdftitle={VERIF-AI: A Deep Learning-Based Framework for Face-Based Deepfake Detection and Forensic Analysis},pdfauthor={Aniket Raj}]{hyperref}
+
+% ---- look and feel (mirrors the reference report) ----
+\setlength{\parindent}{17pt}
+\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.15}
+\captionsetup{font=small,labelfont=rm,labelsep=colon}
+\captionsetup[table]{position=top}
+\captionsetup[figure]{position=bottom}
+\setlength{\cftfigindent}{0em}\setlength{\cfttabindent}{0em}
+\setlist{itemsep=0.2ex,topsep=0.6ex,parsep=0pt}
+\setcounter{tocdepth}{2}\setcounter{secnumdepth}{3}
+\pagestyle{plain}
+\sloppy
+\emergencystretch=2em
+\widowpenalty=10000 \clubpenalty=10000
+
+\definecolor{codebg}{gray}{0.96}
+\definecolor{accent}{HTML}{0F766E}
+\definecolor{navy}{HTML}{0B2540}
+\lstset{basicstyle=\ttfamily\fontsize{6.4}{7.3}\selectfont,backgroundcolor=\color{codebg},frame=single,rulecolor=\color{black!25},breaklines=true,
+        breakatwhitespace=false,columns=fullflexible,keepspaces=true,numbers=left,numberstyle=\fontsize{5}{6}\selectfont\color{black!55},numbersep=5pt,
+        xleftmargin=1.6em,framexleftmargin=1.6em,showstringspaces=false,captionpos=b,aboveskip=1.2ex,belowskip=0.8ex,
+        keywordstyle=\bfseries,language=Python,morekeywords={self,True,False,None}}
+\renewcommand{\lstlistingname}{Listing}
+\renewcommand{\lstlistlistingname}{List of Listings}
+
+% inline code that tolerates _ % # & in file names and identifiers
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\pfake}{\ensuremath{P_{\mathrm{fake}}}}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\floatname{algorithm}{Algorithm}
+
+
+% ---- compact vertical rhythm (page-budget revision) ----
+\makeatletter
+\renewcommand\@makechapterhead[1]{\vspace*{8\p@}{\parindent \z@ \raggedright \normalfont
+  \huge\bfseries \@chapapp\space \thechapter \par\nobreak \vskip 6\p@
+  \interlinepenalty\@M \Huge \bfseries #1\par\nobreak \vskip 18\p@}}
+\renewcommand\@makeschapterhead[1]{\vspace*{8\p@}{\parindent \z@ \raggedright \normalfont
+  \interlinepenalty\@M \Huge \bfseries #1\par\nobreak \vskip 18\p@}}
+\makeatother
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}\setlength{\belowcaptionskip}{0pt}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.9}\renewcommand{\textfraction}{0.08}\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\cftchapafterpnum}{\vskip 2pt}
+\setlength{\cftbeforechapskip}{4pt}\setlength{\cftbeforesecskip}{0pt}\setlength{\cftbeforesubsecskip}{0pt}\setlength{\cftbeforesubsubsecskip}{0pt}
+\renewcommand{\cftsecfont}{\small}\renewcommand{\cftsecpagefont}{\small}
+\renewcommand{\cftsubsecfont}{\small}\renewcommand{\cftsubsecpagefont}{\small}
+\renewcommand{\cftsubsubsecfont}{\small}\renewcommand{\cftsubsubsecpagefont}{\small}
+\renewcommand{\cftfigfont}{\footnotesize}\renewcommand{\cftfigpagefont}{\footnotesize}
+\renewcommand{\cfttabfont}{\footnotesize}\renewcommand{\cfttabpagefont}{\footnotesize}
+\setlength{\cftbeforefigskip}{0pt}\setlength{\cftbeforetabskip}{0pt}
+
+\begin{document}
+\raggedbottom
+
+% ============================ FRONT MATTER (positions measured on the reference report; A4, 1 pt = 1 pt from the top-left corner) ============================
+\newcommand{\pg}[2]{($(current page.north west)+(#1pt,-#2pt)$)}
+\newcommand{\fmtext}[5]{% x, baseline y, anchor, width (0 = natural), content
+  \node[anchor=#3,inner sep=0pt,outer sep=0pt,align=#5,text width=#4] at \pg{#1}{#2}}
+\tikzset{fm/.style={inner sep=0pt,outer sep=0pt}}
+
+% ============================ COVER ============================
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay,fm]
+\node[anchor=north,text width=325pt,align=center,font=\fontsize{16.07}{16.1}\selectfont] at \pg{297.6}{151} {VERIF-AI: A Deep Learning-Based\\Framework for Face-Based Deepfake\\Detection and Forensic Analysis};
+\node[anchor=base,font=\normalsize] at \pg{297.6}{301.5} {Submitted By};
+\node[anchor=base,font=\Large] at \pg{297.6}{324.0} {\fsc{A}{NIKET} \fsc{R}{AJ}};
+\node[anchor=base,font=\Large] at \pg{297.6}{341.9} {SEMESTER - VII};
+\node[anchor=base,font=\Large] at \pg{297.6}{355.4} {230103030};
+\node[anchor=base,font=\normalsize] at \pg{297.6}{375.8} {Under the Guidance of};
+\node[anchor=base,font=\Large] at \pg{297.6}{396.8} {\fsc{D}{R}. \fsc{S}{UNITA} \fsc{W}{ARJRI}};
+\node[anchor=north west] at \pg{226.3}{485} {\includegraphics[width=141.7pt]{figures/iiit_manipur_logo.png}};
+\node[anchor=base,font=\small] at \pg{297.6}{673.1} {\fsc{D}{EPARTMENT OF} \fsc{C}{OMPUTER} \fsc{S}{CIENCE AND} \fsc{E}{NGINEERING}};
+\node[anchor=base,font=\small] at \pg{297.6}{685.2} {\fsc{I}{NDIAN} \fsc{I}{NSTITUTE OF} \fsc{I}{NFORMATION} \fsc{T}{ECHNOLOGY} \fsc{S}{ENAPATI}, \fsc{M}{ANIPUR}};
+\node[anchor=base,font=\small] at \pg{297.6}{698.7} {\fsc{N}{OVEMBER}, 2026};
+\end{tikzpicture}
+\end{titlepage}
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+% ============================ DECLARATION ============================
+\thispagestyle{plain}
+\null
+\begin{tikzpicture}[remember picture,overlay,fm]
+\node[anchor=base,font=\fontsize{16.07}{20}\selectfont\bfseries] at \pg{297.6}{138} {Declaration};
+\node[anchor=north west,text width=358pt,align=justify,font=\normalsize] at \pg{118}{157} {In this submission, I have expressed my idea in my own words, and I have adequately cited and referenced any ideas or words that were taken from another source. I also declare that I adhere to all principles of academic honesty and integrity and that I have not misrepresented or falsified any ideas, data, facts, or sources in this submission. If any violation of the above is made, I understand that the institute may take disciplinary action. Such a violation may also engender disciplinary action from the sources which were not properly cited or permission not taken when needed.};
+\node[anchor=base,font=\normalsize] at \pg{396.6}{301.5} {ANIKET RAJ};
+\node[anchor=base,font=\normalsize] at \pg{401.2}{314.9} {230103030};
+\node[anchor=base west,font=\normalsize] at \pg{120.9}{357.1} {DATE:\ \raisebox{-1pt}{\rule{4.2cm}{0.4pt}}};
+\end{tikzpicture}
+\clearpage
+
+% ============================ CERTIFICATE ============================
+\thispagestyle{empty}
+\null
+\begin{tikzpicture}[remember picture,overlay,fm]
+\node[anchor=north west] at \pg{117.9}{126.9} {\includegraphics[width=51.2pt]{figures/iiit_manipur_logo.png}};
+\node[anchor=base west,font=\normalsize] at \pg{178.2}{159.5} {Department of Computer Science and Engineering};
+\node[anchor=base west,font=\normalsize] at \pg{178.2}{173.2} {Indian Institute of Information Technology Senapati, Manipur};
+\draw[line width=0.4pt] \pg{117.4}{202.3} -- \pg{476.9}{202.3};
+\node[anchor=base west,font=\normalsize] at \pg{118.1}{216.4} {Dr. Sunita Warjri};
+\node[anchor=base east,font=\normalsize] at \pg{476.3}{216.4} {Email: sunitaw@iiitmanipur.ac.in};
+\node[anchor=base west,font=\normalsize] at \pg{118.1}{230.1} {Assistant Professor};
+\node[anchor=base east,font=\normalsize] at \pg{476.3}{230.1} {Contact No: +91 7085262822};
+\node[anchor=base,font=\Huge\bfseries\itshape] at \pg{297.6}{276.2} {To Whom It May Concern};
+\node[anchor=north,text width=358pt,align=center,font=\fontsize{11.16}{15.8}\selectfont] at \pg{297.6}{313.2} {\hyphenpenalty=10000\exhyphenpenalty=10000 \relax This is to certify that the project report entitled \textbf{``VERIF-AI: A Deep Learning-Based Framework for Face-Based Deepfake Detection and Forensic Analysis,''} submitted to the department of Computer Science and Engineering, Indian Institute of Information Technology Senapati, Manipur in partial fulfilment for the award of degree of Bachelor of Technology in Computer Science and Engineering (Specialisation: Artificial Intelligence and Data Science) is a record of bonafide work carried out by \textbf{Aniket Raj} bearing roll number \textbf{230103030}.};
+\node[anchor=base,font=\fontsize{11.16}{15.8}\selectfont] at \pg{391}{507.8} {Signature of Supervisor};
+\node[anchor=base,font=\fontsize{11.16}{15.8}\selectfont\bfseries] at \pg{387}{529.8} {(Dr. Sunita Warjri)};
+\foreach \i in {1,2,3,4}{
+  \pgfmathsetmacro{\yy}{568.5+(\i-1)*24}
+  \node[anchor=base west,font=\normalsize,text width=290pt,align=left] at \pg{118.3}{\yy} {Signature of the Examiner \i\ \dotfill\null};
+}
+\end{tikzpicture}
+\clearpage
+
+% ============================ ABSTRACT ============================
+\chapter*{\centering Abstract}
+\input{chapters/abstract}
+\clearpage
+
+% ============================ ACKNOWLEDGEMENT ============================
+\chapter*{\centering Acknowledgement}
+\input{chapters/acknowledgement}
+\clearpage
+
+% ============================ CONTENTS ============================
+\renewcommand{\contentsname}{Contents}
+\tableofcontents
+\clearpage
+\phantomsection\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\phantomsection\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\clearpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{chapters/ch1_introduction}
+\input{chapters/ch2_literature}
+\input{chapters/ch3_requirements}
+\input{chapters/ch4_design}
+\input{chapters/ch5_implementation}
+\input{chapters/ch6_results}
+\input{chapters/ch7_conclusion}
+
+\appendix
+\input{chapters/appendix}
+
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{unsrtnat}
+{\footnotesize\setlength{\bibsep}{1pt plus 1pt}
+\bibliography{references}}
+
+\end{document}

@@ -1,0 +1,52 @@
+
+\section{Research Gap, Project Contributions, and Novelty}
+\label{sec:novelty}
+This section states what existing work has achieved, which gaps matter for this project, which components are borrowed, and what Verif-AI itself contributes. \textbf{Verif-AI does not propose a new deep-learning architecture}, and it does not claim to have invented EfficientNet, SRM filtering, MTCNN or Grad-CAM; its contributions are in engineering, system integration and experimental method.
+
+\subsection{What existing research has achieved}
+Benchmarks and generators: FaceForensics++ \citep{rossler2019ff}, Celeb-DF \citep{li2020celebdf}, the DFDC dataset \citep{dolhansky2020dfdc} and DeepFakeFace \citep{song2023dff} supply labelled data. Detectors: compact and Xception-style CNNs \citep{afchar2018mesonet,rossler2019ff}; two-stream networks that combine an RGB branch with a low-level residual branch \citep{zhou2017twostream}; detectors that exploit high-frequency/SRM-filtered features to generalise across forgeries \citep{luo2021highfreq}; blending-boundary cues for unseen manipulations \citep{li2020facexray}; recurrent video models over frame features \citep{guera2018rnn,masi2020twobranch}; and detectors studied across generators \citep{wang2020cnn,ojha2023universal,corvi2023diffusion}. Explanation: Grad-CAM \citep{selvaraju2017gradcam}. Evaluation caveats: shortcut learning \citep{geirhos2020shortcut} and over-confident scores \citep{guo2017calibration}. Surveys: \citep{verdoliva2020media,tolosana2020deepfakes}.
+
+\subsection{Gaps that matter for this project}
+\begin{enumerate}[label=G\arabic*.]
+\item The cited papers present \emph{methods and benchmark results}; they are not described as ready-to-use tools that return per-face evidence, video timelines and a record of which model and file produced a result.
+\item Reported accuracy depends on the split. Identity-disjoint, duplicate-free and generator-disjoint testing, and the check that an apparent skill is not a quality shortcut, must be done again for any new system.
+\item Video support is usually a temporal classifier validated inside one dataset; a deployed tool also needs face tracking, aggregation and honest handling of frames for which no evidence was stored.
+\item A prototype inherited by this project (Forensic-Net, Section~\ref{sec:prototype}) reported very high accuracy that could not be reproduced on independent data, so the model itself needed to be re-trained and re-evaluated.
+\end{enumerate}
+
+\subsection{Established components used (not new)}
+EfficientNet-B0 \citep{tan2019efficientnet} as both backbones; the three SRM-style high-pass kernels after Fridrich and Kodovsk\'y \citep{fridrich2012srm}; the two-stream idea of an image branch plus a low-level residual branch \citep{zhou2017twostream}; MTCNN \citep{zhang2016mtcnn}; Grad-CAM \citep{selvaraju2017gradcam}; ImageNet initialisation, AdamW \citep{loshchilov2019adamw} and PyTorch \citep{paszke2019pytorch}; and the public datasets of Chapter~\ref{ch:results}.
+
+\subsection{The prototype and what Verif-AI adds}
+\label{sec:prototype}
+The RGB + three-kernel SRM two-stream design, with its feature concatenation and sigmoid head, comes from the earlier Forensic-Net prototype written by Lakshya Singh (notebook, checkpoint and plots preserved in the repository). That prototype analysed only the first frame of a file and had no application, no leakage-controlled evaluation and no tests. Everything listed below was developed for Verif-AI.
+
+\begin{table}[ht]
+\centering
+\caption[Existing work and how Verif-AI relates to it (only capabilities stated in the cited papers or]{Existing work and how Verif-AI relates to it (only capabilities stated in the cited papers or in this repository).}
+\label{tab:novelty}
+\small
+\begin{tabular}{|p{3.3cm}|p{3.9cm}|p{5.6cm}|}
+\hline
+\textbf{Existing work} & \textbf{What it contributes} & \textbf{Verif-AI: implemented / extended / different} \\ \hline
+Zhou et al.\ \citep{zhou2017twostream} & two-stream face-tampering detector (image + low-level branch) & uses the two-stream idea with fixed SRM residuals; adds identity-disjoint training/evaluation and a per-quality-bin gate \\ \hline
+Fridrich \& Kodovsk\'y \citep{fridrich2012srm} & rich residual models for steganalysis & three fixed kernels as the noise stream; examines when that stream carries a quality shortcut (Section~\ref{sec:diag}) \\ \hline
+Luo et al.\ \citep{luo2021highfreq}; Li et al.\ \citep{li2020facexray} & generalisation through high-frequency features / blending boundaries & not re-implemented; the project measures generalisation with an unseen-generator split instead \\ \hline
+G\"uera \& Delp \citep{guera2018rnn}; Masi et al.\ \citep{masi2020twobranch} & recurrent networks over frame features for video & different approach: per-face scores, IoU face tracks, per-track median, suspicious segments and stored evidence frames (unvalidated aggregation rule) \\ \hline
+Selvaraju et al.\ \citep{selvaraju2017gradcam} & Grad-CAM & applied to the RGB stream, shown with Original/Heatmap/Overlay views, stored for evidence frames, stated as not proof \\ \hline
+Wang et al., Ojha et al., Corvi et al.\ \citep{wang2020cnn,ojha2023universal,corvi2023diffusion} & detectors studied across generators & motivates the internal vs.\ cross-generator reporting; no claim of universal detection \\ \hline
+Celeb-DF, DeepFakeFace, FFHQ/SFHQ \citep{li2020celebdf,song2023dff,karras2019stylegan,sfhq2022} & datasets & used under their licences; leakage control, near-duplicate removal and a licence review before use \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Contributions, by type}
+\begin{description}
+\item[Research novelty.] None claimed at the level of a new architecture or algorithm. The research-level results are empirical findings: (i) the production model was at chance on held-out Celeb-DF video; (ii) image sharpness is a measurable shortcut in DeepFakeFace and the noise stream carries it; (iii) a per-quality-bin acceptance gate (validated with synthetic controls) fails all four candidate models although two pass the usual ROC-AUC screen.
+\item[Engineering novelty.] Training-matched preprocessing (JPEG round-trip), strict checkpoint loading with hash recording, an INCONCLUSIVE band and decisiveness value, atomic job storage, privacy-preserving deletion, memory-aware lite mode, and a model registry (default / alternative / rollback) with per-result model identification.
+\item[System-level integration.] One React + FastAPI application that turns the two-stream model into an inspectable workflow: face detection, image and video analysis, face tracking, Grad-CAM, timelines, evidence frames, downloadable PDF forensic report, history and deletion, deployed as a static frontend plus a hosted API.
+\item[Experimental contribution.] A reproducible Kaggle training and evaluation workflow with pre-registered protocols; four models compared under identical code (Table~\ref{tab:fourvideo}); experiments E1--E4 including a frozen promotion rule; E4 as the latest model, with its limits reported (Section~\ref{sec:e4}).
+\end{description}
+
+\subsection{What remains limited}
+No new detector architecture, no validation of the video aggregation rule on labelled videos, no calibration, no claim about AI-generated video, E4 not approved by the promotion rule, and the live deployment serves v2 (Chapter~\ref{ch:results}, Section~\ref{sec:limits}).
+

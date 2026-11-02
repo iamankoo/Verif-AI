@@ -1,0 +1,22 @@
+Synthetic face imagery produced by generative adversarial networks, face-swapping tools and diffusion models can now be hard to
+distinguish from genuine photographs, which creates a demand for forensic tools that give not only a verdict but also inspectable evidence.
+This report presents \textbf{Verif-AI}, an end-to-end framework for face-based deepfake detection and forensic analysis that works on both
+images and videos. Faces are located with MTCNN and passed to a two-stream convolutional classifier: an EfficientNet-B0 stream that
+reads the RGB face, and a second EfficientNet-B0 stream that reads a noise residual produced by a fixed three-kernel Spatial Rich Model
+(SRM) filter bank. The two feature vectors are fused by a small classification head into a single raw sigmoid score. Gradient-weighted
+Class Activation Mapping (Grad-CAM) shows which facial regions influenced the RGB stream's score, a video pipeline adds face tracking,
+frame-level timelines, suspicious time ranges and stored evidence frames, and a PDF forensic report records the result together with the
+model checkpoint hash and the limitations. The system is implemented as a FastAPI backend and a React/TypeScript dashboard in which
+uploads are deleted immediately after analysis and stored results can be deleted by the user.
+
+The evaluation is reported as it was obtained, including its negative findings. The selected production model (v2, trained on a sample of
+the DeepFakeFace dataset) reaches an accuracy of 0.875 and a ROC-AUC of 0.941 on held-out identities seen-generator data, but only 0.746 and 0.849 on an
+unseen text-to-image generator, and it falsely flags genuine video from the Celeb-DF dataset at chance level. Diagnostic experiments
+traced this failure to an image-quality shortcut in the training data, and adding Celeb-DF video frames and quality augmentation (Model 4)
+raised the video-level accuracy on held-out Celeb-DF identities to 0.980, which is within-dataset evidence only. A further experiment
+with modern-generator faces (E3) detected held-out fakes of those generators almost perfectly, but without a generator-disjoint test it
+cannot be read as evidence of general detection, and it did not meet the pre-registered promotion rule. Scores are raw sigmoid outputs,
+not calibrated probabilities. The latest model, E4, is the default of the local examiner demonstration; it did not pass the promotion rule, so the public deployment still serves v2. The report does not claim a general detector of AI-generated images or videos, and the public deployment on
+free hosting tiers runs in a restricted mode that is not production-ready.
+
+\medskip\noindent\textbf{Keywords:} deepfake detection, two-stream network, EfficientNet, SRM noise residuals, Grad-CAM, digital forensics, FastAPI, React.

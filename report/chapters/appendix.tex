@@ -1,0 +1,80 @@
+\chapter{Source Code Snippets}
+\label{app:code}
+This appendix reproduces excerpts of the source code (unchanged) from the repository files named in each caption.
+
+\section{The Custom SRM Filter Layer and the Two-Stream Network}
+\lstinputlisting[caption={\code{backend/verifai/model.py}: \texttt{SRMLayer} and \texttt{TwoStreamNet}.},label={lst:srm}]{listings/srm_twostream.py}
+
+\section{Preprocessing Shared by Training and Inference}
+\lstinputlisting[caption={\code{backend/verifai/preprocess.py}: JPEG round-trip and normalisation.},label={lst:prep}]{listings/preprocess.py}
+
+\section{Scoring Rules}
+\lstinputlisting[caption={\code{backend/verifai/scoring.py}: decisiveness and the INCONCLUSIVE band.},label={lst:scoring}]{listings/scoring.py}
+
+\section{Face Detection}
+\lstinputlisting[caption={\code{backend/verifai/faces.py}: detection on a downscaled copy with confidence and size filters.},label={lst:faces}]{listings/faces_detect.py}
+
+\section{Grad-CAM}
+\lstinputlisting[caption={\code{backend/verifai/explain.py}: Grad-CAM on the last block of the RGB stream.},label={lst:gradcam}]{listings/gradcam.py}
+
+\begingroup\let\clearpage\relax\let\cleardoublepage\relax\chapter{API and Configuration Reference}\label{app:api}\endgroup
+The endpoints are listed in Table~\ref{tab:endpoints}. The main configuration variables (read from the environment or a \code{.env} file) are:
+
+\begin{table}[H]
+\centering
+\caption{Backend environment variables.}
+\label{tab:env}
+\footnotesize
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{5.1cm}|p{6.8cm}|}
+\hline
+\textbf{Variable} & \textbf{Meaning} \\ \hline
+\code{VERIFAI_MODEL_PATH} & Default checkpoint (if unset: the first existing of E4, Model 4, v2, original prototype) \\ \hline
+\code{VERIFAI_ENABLE_MODEL_SELECTION} & \texttt{true}: other registered models can be chosen per analysis; \texttt{false} on hosted instances \\ \hline
+\code{VERIFAI_STORAGE_DIR} & Folder for results and evidence images \\ \hline
+\code{VERIFAI_CORS_ORIGINS} & Comma-separated browser origins allowed to call the API \\ \hline
+\code{VERIFAI_PUBLIC_HISTORY} & \texttt{false} makes the global list of analyses empty \\ \hline
+\code{VERIFAI_RESULT_TTL_HOURS} & Retention time of results (default 72) \\ \hline
+\code{VERIFAI_MAX_IMAGE_MB}, \code{VERIFAI_MAX_VIDEO_MB} & Upload limits (defaults 15 and 200) \\ \hline
+\code{VERIFAI_ENABLE_HEATMAPS} & Switch Grad-CAM on or off \\ \hline
+\code{VERIFAI_INFER_BATCH_SIZE}, \code{VERIFAI_VIDEO_BATCH_SIZE} & Batch sizes (memory knobs; scores do not depend on them) \\ \hline
+\code{VERIFAI_DEVICE} & \texttt{auto}, \texttt{cpu} or a CUDA device \\ \hline
+\code{VITE_API_BASE_URL} (frontend) & Public origin of the hosted API, set at build time \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begingroup\let\clearpage\relax\let\cleardoublepage\relax\chapter{Dataset and Licence Review}\label{app:datasets}\endgroup
+Candidate training datasets were reviewed from their descriptions and by profiling their files (counts, formats, resolution, file size, sharpness; 916{,}062
+images in 26 folders) in a private notebook that exported statistics only. Licence badges shown by the hosting site were \emph{not} accepted as proof; the terms of the
+upstream sources were applied. This is an engineering review and not legal advice. The intended use is a non-commercial academic project.
+
+\begin{table}[H]
+\centering
+\caption{Decisions of the dataset review.}
+\label{tab:licence}
+\footnotesize
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{2.6cm}|p{6.8cm}|p{2.2cm}|}
+\hline
+\textbf{Dataset} & \textbf{Finding} & \textbf{Decision} \\ \hline
+RealVsFake 162k & Reals are FFHQ and CelebA (non-commercial terms), contradicting the declared CC0 badge; about half of the real images are PNG while 99\% of the fakes are JPG (format shortcut). & Excluded \\ \hline
+DeepFakeFusion-399K & Composite of Celeb-DF, FaceForensics++ (access agreement) and other sources, declared MIT; overlaps the Celeb-DF test data used here. & Excluded \\ \hline
+DeepDetect-2025 & Fakes from modern generators; reals of unspecified origin; test-split reals differ strongly from train-split reals; non-face categories present. & Fake side only, face-filtered \\ \hline
+Real vs AI Generated Faces & FFHQ reals (upstream CC BY-NC-SA 4.0) and SFHQ fakes (upstream CC0) with clear provenance; other folders of unestablished provenance; \texttt{dataset/} folder duplicates \texttt{data\_source/}. & FFHQ and SFHQ only \\ \hline
+DeepFakeFace, Celeb-DF v2 & As in earlier experiments; Celeb-DF terms allow research use only. & Used \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\textbf{Attribution.} FFHQ: T.\ Karras, S.\ Laine and T.\ Aila, NVIDIA, CC BY-NC-SA 4.0, photographs by many Flickr users under their own licences;
+SFHQ: Synthetic Faces High Quality (CC0); Celeb-DF v2: Li et al.; DeepFakeFace: Song et al.
+
+\begingroup\let\clearpage\relax\let\cleardoublepage\relax\chapter{Reproducibility}\label{app:repro}\endgroup
+\begin{itemize}
+\item \textbf{Tests.} Backend: \texttt{cd backend \&\& python -m pytest -q}. Frontend: \texttt{cd frontend \&\& npm test \&\& npx tsc --noEmit \&\& npm run build}. End-to-end: \texttt{npx playwright test} against a running server.
+\item \textbf{Training notebooks.} \code{kaggle/build_*_bundle.py} build the private notebooks; third-party data stay inside the notebook and only checkpoints and metrics are exported.
+\item \textbf{Result files.} The experiment records referred to in Chapter~\ref{ch:results} are in \code{docs/results/} and the pre-registered protocols in \code{docs/}
+(\code{STAGE0_PROTOCOL.md}, \code{E3_PROTOCOL.md}, \code{E4_PROTOCOL_ADDENDUM.md}).
+\item \textbf{This report.} The tables of Chapter~\ref{ch:results} are generated by \code{report/scripts/make_tables.py} from the saved result files.
+\end{itemize}

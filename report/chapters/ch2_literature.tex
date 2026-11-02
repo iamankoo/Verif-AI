@@ -1,0 +1,131 @@
+\chapter{Literature Survey}
+\label{ch:lit}
+
+\section{Literature Survey}
+This chapter summarises the research that Verif-AI builds on and the open problems that shaped its evaluation. It is not a complete survey;
+broader reviews are given by Verdoliva \citep{verdoliva2020media} and Tolosana et al.\ \citep{tolosana2020deepfakes}.
+
+\subsection{Evolution of Deepfake Generation and Detection}
+\textbf{Generation.} Generative adversarial networks \citep{goodfellow2014gan} made photorealistic face synthesis practical;
+StyleGAN and its successors generate high-resolution faces from a latent code \citep{karras2019stylegan,karras2020stylegan2}. Face-swapping
+and re-enactment methods transfer one person's face or expression onto another's video, and the FaceForensics++ benchmark collects four
+such manipulation families \citep{rossler2019ff}. Diffusion models \citep{ho2020ddpm}, in particular latent diffusion
+\citep{rombach2022ldm}, now produce images from text prompts and can inpaint or edit regions of real photographs, so a single dataset
+may contain fully synthetic, edited and swapped faces.
+
+\textbf{Detection.} Early detectors used compact convolutional networks on face crops, such as MesoNet \citep{afchar2018mesonet}, or
+general-purpose backbones such as Xception \citep{chollet2017xception} that performed best in the FaceForensics++ study
+\citep{rossler2019ff}. Two-stream networks combine an RGB stream with a stream that sees low-level traces: Zhou et al.\
+\citep{zhou2017twostream} paired a face-classification stream with a steganalysis-features stream for tampered faces, and constrained
+convolutional layers \citep{bayar2016constrained} learn high-pass filters for manipulation detection. Dang et al.\ \citep{dang2020detection}
+add attention maps that localise manipulated regions. Large benchmark efforts such as Celeb-DF \citep{li2020celebdf} and the DFDC
+collection \citep{dolhansky2020dfdc} made video-level evaluation possible.
+
+\subsection{Theoretical Framework of Modern Forensics}
+\textbf{RGB versus noise residuals.} A generator leaves statistical traces in the high-frequency content of an image that are largely
+independent of the depicted face. Rich-model steganalysis \citep{fridrich2012srm} extracts such traces by applying fixed high-pass
+\emph{residual} filters and analysing the co-occurrence of the residuals. Verif-AI uses a fixed bank of three $3\times3$ high-pass
+kernels (Chapter~\ref{ch:design}) that suppress image content and leave a noise residual for a second convolutional stream. The filters
+are not trained, which keeps the stream's input independent of the training data.
+
+\textbf{EfficientNet.} EfficientNet \citep{tan2019efficientnet} scales depth, width and resolution of a convolutional network with a
+compound coefficient. The smallest member, EfficientNet-B0, has about 5.3 million parameters and reports 77.1\% ImageNet top-1
+accuracy, which makes two parallel copies affordable on a CPU.
+
+\textbf{Grad-CAM.} Gradient-weighted Class Activation Mapping \citep{selvaraju2017gradcam} weights the activation maps of a chosen
+convolutional layer by the average gradient of the class score with respect to them and shows the result as a coarse heat-map. The map
+indicates regions that increased the score; it is an explanation of the \emph{model}, not evidence that those pixels were altered
+\citep{selvaraju2017gradcam}. Figure~\ref{fig:srm-concept} contrasts the information seen by the two streams.
+
+\begin{figure}[ht]
+\centering
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tikzpicture}[font=\small,x=1cm,y=1cm]
+\foreach \i/\t/\c in {0/{RGB face (what a person sees)}/navy!10, 1/{High-pass residual (what the SRM stream sees)}/accent!10}{
+  \node[draw,minimum width=3.7cm,minimum height=3.0cm,fill=\c] at (4.4*\i,0) {};
+  \node[align=center,font=\footnotesize,text width=3.6cm] at (4.4*\i,-2.1) {\t};
+}
+\foreach \a in {0,...,7}{\foreach \b in {0,...,5}{
+  \pgfmathtruncatemacro{\w}{20+mod(\a*7+\b*13,5)*10}
+  \fill[navy!\w] ({-1.8+\a*0.46},{1.35-\b*0.5}) rectangle ++(0.42,0.46);
+}}
+\foreach \a in {0,...,31}{\foreach \b in {0,...,23}{
+  \pgfmathtruncatemacro{\v}{(mod(\a*17+\b*29+\a*\b,7)>5) ? 40 : 6}
+  \fill[accent!\v] ({2.6+\a*0.115},{1.4-\b*0.12}) rectangle ++(0.1,0.1);
+}}
+\draw[-{Stealth},thick] (1.9,0)--(2.5,0);
+\end{tikzpicture}
+\end{adjustbox}
+\caption[Illustration (schematic, not a real face) of the idea behind the two streams: the RGB stream]{Illustration (schematic, not a real face) of the idea behind the two streams: the RGB stream sees image content, whereas the fixed
+SRM-style filters remove content and leave a high-frequency noise residual in which generator traces may remain.}
+\label{fig:srm-concept}
+\end{figure}
+
+\subsection{Analysis of Benchmark Architectures}
+Table~\ref{tab:backbones} compares backbones commonly used for face-manipulation detection. The figures are the sizes and ImageNet
+results reported by the original papers; they describe the architectures, not their forensic accuracy, which depends on training data.
+
+\begin{table}[ht]
+\centering
+\caption{Backbones used in the deepfake-detection literature (published figures).}
+\label{tab:backbones}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|l|c|c|p{5.2cm}|}
+\hline
+\textbf{Architecture} & \textbf{Params (M)} & \textbf{ImageNet top-1} & \textbf{Relevance} \\ \hline
+MesoNet (Meso-4) \citep{afchar2018mesonet} & 0.028 & -- & Very small network designed for face-video forgery \\ \hline
+Xception \citep{chollet2017xception} & 22.9 & 79.0\% & Strongest baseline in FaceForensics++ \citep{rossler2019ff} \\ \hline
+ResNet-50 \citep{he2016resnet} & 25.6 & -- & Common general-purpose baseline \\ \hline
+\textbf{EfficientNet-B0} \citep{tan2019efficientnet} & \textbf{5.3} & \textbf{77.1\%} & Used for both streams of Verif-AI \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Comparison of Forensic Datasets}
+Table~\ref{tab:datasets} lists the datasets that matter for this project. Their \emph{construction} matters as much as their size: how real and
+fake samples are paired, whether identities repeat across splits, and how fakes were compressed or processed all create shortcuts that a
+detector can learn instead of the manipulation itself (Section~\ref{sec:shortcuts}).
+
+\begin{table}[ht]
+\centering
+\caption[Datasets referenced in this work (figures as stated by the dataset papers or by the dataset]{Datasets referenced in this work (figures as stated by the dataset papers or by the dataset documentation in the repository).}
+\label{tab:datasets}
+\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{|p{2.6cm}|p{3.0cm}|p{2.9cm}|p{3.4cm}|}
+\hline
+\textbf{Dataset} & \textbf{Content} & \textbf{Fakes} & \textbf{Use in Verif-AI} \\ \hline
+FaceForensics++ \citep{rossler2019ff} & 1{,}000 original videos & 4 manipulation methods & Cited; not used (access agreement) \\ \hline
+DFDC \citep{dolhansky2020dfdc} & over 100{,}000 clips & Several methods & Cited; not used \\ \hline
+Celeb-DF v2 \citep{li2020celebdf} & 590 real and 5{,}639 fake videos & Face swap (one method) & Video-level training and test (research use only) \\ \hline
+DeepFakeFace \citep{song2023dff} & 30{,}000 real (IMDB-WIKI) photographs \citep{rothe2018imdbwiki} & 3$\times$30{,}000: inpainting, face swap, text-to-image & Primary training data (sampled subset) \\ \hline
+FFHQ \citep{karras2019stylegan} & 70{,}000 real faces & -- & Real faces in experiment E3 \\ \hline
+SFHQ \citep{sfhq2022} & Synthetic faces & StyleGAN-generated & Fake faces in experiment E3 \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Generalisation, Shortcuts and Calibration}
+\label{sec:shortcuts}
+\textbf{Generalisation.} A classifier trained on images from one generator can be nearly perfect on that generator and weak on others.
+Wang et al.\ \citep{wang2020cnn} found that a classifier trained on one GAN with suitable augmentation generalised surprisingly well to
+other CNN-based generators, while stressing the limits of that result; Ojha et al.\ \citep{ojha2023universal} and Corvi et al.\ \citep{corvi2023diffusion} study the transfer between GAN and diffusion generators, where detectors trained on one family often degrade on
+the other. A reliable evaluation therefore needs a held-out \emph{generator}, not only held-out images.
+
+\textbf{Shortcut learning.} Geirhos et al.\ \citep{geirhos2020shortcut} describe how networks solve benchmarks with unintended cues.
+In deepfake data the cue may be image sharpness, resolution, file format, compression history or the source of the real class.
+Chapter~\ref{ch:results} documents a concrete case in this project.
+
+\textbf{Calibration and explanation.} The sigmoid output of a modern network is usually over-confident
+\citep{guo2017calibration}; Verif-AI therefore labels it a \emph{model score} and never a probability. Grad-CAM maps are explanations of
+the model's decision, and as noted above they do not prove manipulation.
+
+\subsection{Synthesis and Research Gap}
+Prior work supplies the ingredients --- an efficient backbone, a noise-residual stream, class-activation explanations and benchmark
+datasets --- but a practical forensic tool also needs a consistent preprocessing pipeline, video aggregation, privacy-preserving
+handling of uploads and an evaluation that distinguishes internal from cross-generator behaviour. The gap addressed in this report is
+therefore less a new architecture than a \emph{complete and honestly evaluated system}: the two-stream design is kept, while the data
+splits, leakage checks, failure diagnosis and the limits of each claim are treated as first-class results.
+
+\input{chapters/ch2_novelty}

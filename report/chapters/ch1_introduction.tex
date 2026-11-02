@@ -1,0 +1,93 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Introduction}
+Photographs and video of a person's face have long served as informal evidence of identity and events. Generative models have weakened
+that assumption: generative adversarial networks (GANs) \citep{goodfellow2014gan,karras2019stylegan}, face-swapping and re-enactment
+tools \citep{rossler2019ff} and, more recently, diffusion models \citep{ho2020ddpm,rombach2022ldm} can produce or alter faces whose
+artefacts are invisible to the naked eye. Research on \emph{media forensics} \citep{verdoliva2020media,tolosana2020deepfakes} responds
+with automatic detectors, but a detector that only prints ``fake'' or ``real'' is of limited use to a reviewer: the verdict has to be accompanied
+by evidence that can be inspected, by the conditions under which it is reliable, and by an honest statement of what it cannot decide.
+
+\emph{Verif-AI} is a software system built around that idea. It accepts an image or a video, finds the faces in it, scores every face with a
+two-stream convolutional network, shows which facial regions influenced the score, summarises a video over time and generates a PDF
+forensic report. This report describes the design, the implementation, and --- with equal weight --- the evaluation of the system,
+including the experiments that showed where it fails.
+
+\subsection{Problem Statement: Verifying Faces in an Age of Synthetic Media}
+The practical problem has three parts.
+
+\begin{enumerate}
+\item \textbf{Detection.} Given a face crop, estimate whether it shows a photographed face or a generated or manipulated one. Detectors
+trained on one family of manipulations often transfer poorly to another \citep{wang2020cnn,ojha2023universal,corvi2023diffusion}, so the
+measured accuracy depends heavily on how the test data relate to the training data.
+\item \textbf{Evidence.} A score alone does not let a reviewer judge a result. The system must localise what drove the decision, report the
+detection confidence of the face finder, show where in a video suspicious frames occur and keep a record (file hash, model checkpoint,
+settings) that makes the analysis reproducible.
+\item \textbf{Honesty and privacy.} Neural scores are not probabilities of authenticity \citep{guo2017calibration}, detectors are exposed to
+\emph{shortcuts} in their training data \citep{geirhos2020shortcut}, and uploaded media can be sensitive. The system must therefore say
+``inconclusive'' when it cannot decide, avoid presenting scores as certainties, and delete uploads after use.
+\end{enumerate}
+
+\begin{figure}[ht]
+\centering
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tikzpicture}[font=\small,node distance=0.45cm and 0.6cm,
+  box/.style={draw,rounded corners=2pt,minimum height=0.9cm,align=center,fill=white},
+  io/.style={draw,rounded corners=2pt,minimum height=0.9cm,align=center,fill=navy!8},
+  arr/.style={-{Stealth[length=2mm]},thick}]
+\node[io] (in) {Image or\\video};
+\node[box,right=of in] (det) {Face\\detection\\(MTCNN)};
+\node[box,right=of det] (model) {Two-stream\\classifier};
+\node[io,right=of model] (out) {Verdict, score,\\Grad-CAM, report};
+\draw[arr] (in)--(det); \draw[arr] (det)--(model); \draw[arr] (model)--(out);
+\node[box,below=0.6cm of model,fill=accent!12] (ev) {Evidence: heat-maps, timeline, face tracks, PDF report};
+\draw[arr,dashed] (model)--(ev);
+\end{tikzpicture}
+\end{adjustbox}
+\caption[Conceptual overview of Verif-AI]{Conceptual overview of Verif-AI. A face is located, scored by a two-stream network and returned together with inspectable
+evidence. Scores are raw model outputs (not probabilities); INCONCLUSIVE is an explicit outcome.}
+\label{fig:overview}
+\end{figure}
+
+\subsection{Motivation and Project Objectives}
+The project started from an earlier prototype that combined an RGB and an SRM noise stream and reported very high accuracy on a single
+dataset. When the prototype's checkpoint was evaluated on independent, identity-disjoint data it performed at chance level, which made the
+central motivation of this work concrete: \emph{a detector is only as trustworthy as its evaluation}. The objectives were therefore both
+engineering and scientific:
+
+\begin{itemize}
+\item \textbf{Objective 1:} to re-implement the two-stream detector as a clean, tested software package that loads the original
+checkpoints and a newly trained one, with identical preprocessing for training and inference.
+\item \textbf{Objective 2:} to train and evaluate the model with identity-disjoint splits, duplicate removal, validation-only model
+selection and a clear separation of internal and cross-generator evaluation.
+\item \textbf{Objective 3:} to provide explainable output --- Grad-CAM heat-maps, face-level scores, video timelines, face tracks and a PDF report --- through an
+API and a web dashboard, with privacy-preserving handling of uploads.
+\item \textbf{Objective 4:} to investigate honestly where the model fails (for example on genuine video) and to document the cause and the
+limits of every claim.
+\item \textbf{Objective 5:} to deploy a public demonstration (static frontend, hosted API) and to state its restrictions truthfully.
+\end{itemize}
+
+\subsection{Scope and Target Applications}
+Verif-AI analyses \emph{faces}. It is intended for educational demonstration, exploratory review of suspicious face media by a human and
+research on detector generalisation. It is \textbf{not} a general detector of AI-generated images or videos, does not analyse non-face content,
+does not establish authorship or provenance, and a ``real'' result is not proof of authenticity. Scores are uncalibrated; these boundaries decide how
+every number in Chapter~\ref{ch:results} may be read.
+
+\subsection{Contributions}
+\begin{enumerate}
+\item A tested two-stream detection package with a documented preprocessing pipeline that reproduces training-time cropping, JPEG
+round-trip and normalisation at inference time (Chapters~\ref{ch:design} and~\ref{ch:impl}).
+\item An image and video analysis service with Grad-CAM evidence, face tracking, frame timelines, PDF reports and deletion
+(Chapter~\ref{ch:impl}), and a dashboard with original, heat-map and overlay views.
+\item An evaluation record that includes an identified failure (chance-level behaviour on genuine video), a diagnosis of its cause as an
+image-quality shortcut, a pre-registered acceptance gate and modern-generator experiments (Chapter~\ref{ch:results}).
+\item A reproducible training and data-review workflow (Kaggle GPU notebooks that export only checkpoints and metrics) and a dataset
+licence review that did not accept licence badges as proof (Chapter~\ref{ch:results} and Appendix~\ref{app:datasets}).
+\end{enumerate}
+
+\subsection{Organisation of the Report}
+Chapter~\ref{ch:lit} surveys the field, the research gap and the contributions of this work; Chapter~\ref{ch:req} the requirements and technology stack;
+Chapter~\ref{ch:design} the architecture, model and pipelines; Chapter~\ref{ch:impl} their implementation, testing and deployment;
+Chapter~\ref{ch:results} the experiments, their interpretation and limitations; Chapter~\ref{ch:concl} the conclusion and future work.
+Appendices~\ref{app:code}--\ref{app:datasets} give key source code, the API and configuration, and the dataset review.
