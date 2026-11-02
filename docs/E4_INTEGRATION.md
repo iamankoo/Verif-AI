@@ -60,3 +60,15 @@ Server working set peaked at **about 1.47 GB** with two models loaded and a vide
 * **Hide candidates:** `VERIFAI_ENABLE_MODEL_SELECTION=false`.
 * **Code:** this work is on branch `feat/e4-candidate-integration`; `git revert <merge commit>` on `release/live` (or redeploy the previous Render deploy from the Render dashboard -> Deploys -> *Rollback*, and promote the previous Vercel production deployment). The previous live frontend deployment was `verfai-5hh8fkkrq-iamankoos-projects.vercel.app`.
 * No checkpoint was modified, moved or deleted, so every rollback is just configuration.
+
+## 7. Deployment status (verified 2026-11-02)
+| Item | Value |
+|---|---|
+| Git | feature branch `feat/e4-candidate-integration` (commits `3568468`, `0768a13`, `375dd54`); merged with a merge commit into the deployable branch `release/live` (`2f87f2d`) and `main` fast-forwarded to it; all pushed to `github.com/iamankoo/Verif-AI` (no force-push) |
+| Backend | Render web service `verifai-api` (Docker, free tier, auto-deploy on `release/live`): https://verifai-api-11wg.onrender.com - redeployed from `2f87f2d`, health OK |
+| Frontend | Vercel project `verfai` (production, deployed with the CLI): https://verfai.vercel.app |
+| **Model actually serving the live site** | **v2** (`verifai_v2_best.pth`, SHA-256 `3b947755...370d7`), reported by `/api/model` and `/api/models` as the production default of that instance. **Not Model 4 and not E4** (see section 5) |
+| Live `/api/models` | `{default: v2, selection_enabled: false, models: [v2]}` - candidates are not offered on the hosted instance |
+| Live smoke tests (Playwright, real Chrome, public test image and synthetic clip, cross-origin Vercel -> Render) | 9 passed, 3 skipped (model selection: the live server offers one model; 2 private-media tests deliberately not run). Covered: site and API docs reachable, navigation, upload card, rejected files, deep links/refresh, image analysis with the Grad-CAM-unavailable state, PDF download, deletion, video job with timeline/tracks/evidence/PDF/deletion, responsive layouts, no console errors |
+| Live API checks | public history list empty; analyses deleted by the tests return 404; the Render log window showed health checks 200 and no `Traceback`, `ERROR`, out-of-memory or 5xx lines |
+| Previous live state kept for rollback | Vercel deployment `verfai-5hh8fkkrq-iamankoos-projects.vercel.app` (promote it in the Vercel dashboard); Render: Deploys -> previous deploy -> Rollback; or `git revert 2f87f2d -m 1` on `release/live` |

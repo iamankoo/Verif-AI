@@ -21,7 +21,7 @@ Status of the delivery plan. "Done" means the listed verification was actually e
 | 15 | GitHub delivery | Done — pushed to `main` and verified on GitHub | completion report |
 | 16 | Experiments E1-E4 (shortcut diagnosis, stage-0 gate, modern-generator and source-balanced training under a frozen promotion rule) | Done - **no candidate promoted** (E3A and E4 fail criterion 2) | `docs/E1_QUALITY_BIN_DIAGNOSTIC.md`, `docs/E3_RESULTS.md`, `docs/E4_RESULTS.md` |
 | 17 | Model registry: Model 4 default, v2 rollback, E4 selectable candidate (API, dashboard, labelled results) | Done - tests: see `docs/E4_INTEGRATION.md` | `backend/verifai/registry.py`, `backend/tests/test_model_registry.py` |
-| 18 | Redeploy (Render backend + Vercel frontend) and live verification | see `docs/E4_INTEGRATION.md` (deployment status) | `docs/DEPLOYMENT.md` |
+| 18 | Redeploy (Render backend + Vercel frontend) and live verification | Done 2026-11-02 - live API serves **v2** (Model 4 / E4 cannot be hosted on the free tier); live E2E 9 passed / 3 skipped - see `docs/E4_INTEGRATION.md` section 7 | `docs/DEPLOYMENT.md` |
 
 ## Not done / out of scope
 - Validation on face-swap video benchmarks (Celeb-DF, FaceForensics++, DFDC): restricted datasets, not obtainable without agreements.
