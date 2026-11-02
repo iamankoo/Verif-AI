@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "backend"
-DIST = ROOT / "kaggle" / "dist" / "e3"
+DIST_BASE = ROOT / "kaggle" / "dist"
 
 CELLS = [
 ("md", """# Verif-AI - E3: modern-generator training (GPU)
@@ -142,11 +142,29 @@ for name, _ in RUNS:
 ]
 
 
-def notebook() -> dict:
+E4_REPEAT = '''md.write_merged("manifests/combined_manifest.csv", mrows2, "manifests/combined_modern_manifest.csv")
+# E4: repeat every DeepFakeFace TRAINING row 4x (validation and test untouched); report the effective sample size
+import csv as _csv
+_rows = list(_csv.DictReader(open("manifests/combined_modern_manifest.csv", encoding="utf-8")))
+_out, _r = [], []
+for _x in _rows:
+    _k = 4 if (_x["split"] == "train" and _x["source"] == "dff") else 1
+    _out += [_x] * _k; _r += [_k] * 1
+print("train rows unique:", sum(1 for _x in _rows if _x["split"] == "train"), "-> with repeats:", sum(1 for _x in _out if _x["split"] == "train"))
+_rt = [(_k) for _x, _k in zip(_rows, _r) if _x["split"] == "train"]; print("effective sample size of the repeated training set:", round(sum(_rt) ** 2 / sum(k * k for k in _rt)), "of", sum(_rt))
+with open("manifests/combined_modern_manifest.csv", "w", newline="", encoding="utf-8") as _f:
+    _w = _csv.DictWriter(_f, fieldnames=_rows[0].keys()); _w.writeheader(); _w.writerows(_out)'''
+
+
+def notebook(variant: str = "e3") -> dict:
     src_md = repr((BACKEND / "training" / "modern_data.py").read_text(encoding="utf-8"))
     cells = []
     for kind, src in CELLS:
         src = src.replace("@@MODERN_DATA_SOURCE@@", src_md)
+        if variant == "e4":
+            src = src.replace("md.write_merged(\"manifests/combined_manifest.csv\", mrows2, \"manifests/combined_modern_manifest.csv\")", E4_REPEAT)
+            src = src.replace('RUNS = [("e3a_modern_qa0.5", ["--quality-aug", "0.5"]), ("e3b_modern_noQA", ["--quality-aug", "0.0"])]', 'RUNS = [("e4a_dffx4_modern_qa0.5", ["--quality-aug", "0.5"])]')
+            src = src.replace('name.startswith("e3")', 'name.startswith("e4")').replace("verifai_e3_results.zip", "verifai_e4_results.zip").replace("e3_data.json", "e4_data.json").replace("e3_selection.json", "e4_selection.json")
         lines = src.split("\n")
         c = {"cell_type": "markdown" if kind == "md" else "code", "metadata": {}, "source": [l + "\n" for l in lines[:-1]] + [lines[-1]]}
         if kind == "code":
@@ -158,13 +176,15 @@ def notebook() -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--username", required=True)
+    ap.add_argument("--variant", choices=["e3", "e4"], default="e3")
     a = ap.parse_args()
+    DIST = DIST_BASE / a.variant
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir(parents=True)
-    (DIST / "e3.ipynb").write_text(json.dumps(notebook(), indent=1), encoding="utf-8")
+    (DIST / f"{a.variant}.ipynb").write_text(json.dumps(notebook(a.variant), indent=1), encoding="utf-8")
     (DIST / "kernel-metadata.json").write_text(json.dumps({
-        "id": f"{a.username}/verif-ai-e3", "title": "Verif-AI E3", "code_file": "e3.ipynb", "language": "python", "kernel_type": "notebook",
+        "id": f"{a.username}/verif-ai-{a.variant}", "title": f"Verif-AI {a.variant.upper()}", "code_file": f"{a.variant}.ipynb", "language": "python", "kernel_type": "notebook",
         "is_private": "true", "enable_gpu": "true", "enable_internet": "true",
         "dataset_sources": [f"{a.username}/verifai-bundle", f"{a.username}/verifai-candidates", "reubensuju/celeb-df-v2",
                             "philosopher0808/real-vs-ai-generated-faces-dataset", "ayushmandatta1/deepdetect-2025"],
